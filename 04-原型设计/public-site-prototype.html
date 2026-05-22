@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MaaS Platform — AI 模型服务平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .page-section { display: none; }
+    .page-section.active { display: block; }
+    .nav-link.active { color: #2563EB; border-bottom: 2px solid #2563EB; }
+    /* 代码块 */
+    pre { background: #0F172A; color: #E2E8F0; border-radius: 8px; padding: 16px; font-size: 13px; overflow-x: auto; }
+    code { font-family: 'SF Mono', 'Fira Code', monospace; }
+    /* Playground 聊天气泡 */
+    .chat-bubble-user { background: #EFF6FF; border: 1px solid #BFDBFE; }
+    .chat-bubble-ai { background: #FFFFFF; border: 1px solid #E2E8F0; }
+    /* 模型卡片 hover */
+    .model-card:hover { border-color: #93C5FD; box-shadow: 0 2px 8px rgba(37,99,235,0.08); }
+    /* 功能亮点卡片 */
+    .feature-card { transition: box-shadow 0.2s; }
+    .feature-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+    /* 滚动条细化 */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+    /* Playground 计数 */
+    #playTrialBanner { transition: opacity 0.3s; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<!-- ===== 顶部导航栏 ===== -->
+<header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+    <!-- Logo -->
+    <div class="flex items-center gap-2 cursor-pointer" onclick="showPage('home')">
+      <i class="fa-solid fa-bolt text-blue-600 text-lg"></i>
+      <span class="font-bold text-slate-900 text-base tracking-tight">MaaS Platform</span>
+    </div>
+    <!-- 导航链接 -->
+    <nav class="flex items-center gap-1">
+      <button onclick="showPage('home')" id="nav-home"
+        class="nav-link px-4 py-3.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b-2 border-transparent">
+        首页
+      </button>
+      <button onclick="showPage('models')" id="nav-models"
+        class="nav-link px-4 py-3.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b-2 border-transparent">
+        模型广场
+      </button>
+      <button onclick="showPage('playground')" id="nav-playground"
+        class="nav-link px-4 py-3.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b-2 border-transparent">
+        Playground
+      </button>
+      <button onclick="showPage('docs')" id="nav-docs"
+        class="nav-link px-4 py-3.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b-2 border-transparent">
+        文档
+      </button>
+      <button onclick="showPage('pricing')" id="nav-pricing"
+        class="nav-link px-4 py-3.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors border-b-2 border-transparent">
+        定价
+      </button>
+    </nav>
+    <!-- 右侧操作 -->
+    <div class="flex items-center gap-3">
+      <button onclick="showLoginModal()" class="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors px-3 py-1.5">登录</button>
+      <button onclick="showRegisterModal()" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-1.5 rounded-lg transition-colors">
+        免费注册
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== 主体内容（各页面） ===== -->
+<main>
+
+<!-- =================== 首页 =================== -->
+<div id="page-home" class="page-section active">
+
+  <!-- Hero 区域 -->
+  <section class="bg-white border-b border-slate-200">
+    <div class="max-w-7xl mx-auto px-6 py-20 flex gap-16 items-center">
+      <div class="flex-1">
+        <div class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 text-xs font-medium px-3 py-1 rounded-full mb-6 border border-blue-100">
+          <i class="fa-solid fa-circle-dot text-xs"></i>
+          已接入 60+ 主流模型，持续更新
+        </div>
+        <h1 class="text-4xl font-bold text-slate-900 leading-tight mb-5">
+          统一接入所有 AI 模型<br/>
+          <span class="text-blue-600">一个 API，无限可能</span>
+        </h1>
+        <p class="text-slate-500 text-lg leading-relaxed mb-8 max-w-lg">
+          通过兼容 OpenAI 格式的统一 API，低成本接入 GPT-4o、Claude、Qwen、DeepSeek 等主流大模型。
+          内置智能路由、成本控制与可观测性，专为企业级场景设计。
+        </p>
+        <div class="flex items-center gap-4">
+          <button onclick="showRegisterModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-rocket"></i>
+            免费开始使用
+          </button>
+          <button onclick="showPage('playground')" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-6 py-3 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+            <i class="fa-solid fa-play"></i>
+            在线体验
+          </button>
+        </div>
+        <!-- 统计数字 -->
+        <div class="flex items-center gap-8 mt-10 pt-8 border-t border-slate-100">
+          <div>
+            <p class="text-2xl font-bold text-slate-900">60+</p>
+            <p class="text-xs text-slate-400 mt-0.5">接入模型</p>
+          </div>
+          <div class="w-px h-8 bg-slate-200"></div>
+          <div>
+            <p class="text-2xl font-bold text-slate-900">99.9%</p>
+            <p class="text-xs text-slate-400 mt-0.5">服务可用性</p>
+          </div>
+          <div class="w-px h-8 bg-slate-200"></div>
+          <div>
+            <p class="text-2xl font-bold text-slate-900">3,200+</p>
+            <p class="text-xs text-slate-400 mt-0.5">企业用户</p>
+          </div>
+          <div class="w-px h-8 bg-slate-200"></div>
+          <div>
+            <p class="text-2xl font-bold text-slate-900">50亿+</p>
+            <p class="text-xs text-slate-400 mt-0.5">月调用次数</p>
+          </div>
+        </div>
+      </div>
+      <!-- 代码示例卡片 -->
+      <div class="flex-shrink-0 w-96">
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="flex items-center gap-2 px-4 py-3 bg-slate-50 border-b border-slate-200">
+            <div class="w-3 h-3 rounded-full bg-red-400"></div>
+            <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+            <div class="w-3 h-3 rounded-full bg-green-400"></div>
+            <span class="ml-2 text-xs text-slate-400 font-mono">quickstart.py</span>
+          </div>
+          <pre class="rounded-none text-xs leading-relaxed m-0 rounded-b-xl"><code><span class="text-blue-400">from</span> openai <span class="text-blue-400">import</span> OpenAI
+
+<span class="text-slate-400"># 替换为你的 API Key</span>
+client = OpenAI(
+    api_key=<span class="text-green-400">"sk-maas-xxxxxxxx"</span>,
+    base_url=<span class="text-green-400">"https://api.maas.io/v1"</span>
+)
+
+response = client.chat.completions.create(
+    model=<span class="text-green-400">"gpt-4o"</span>,  <span class="text-slate-400"># 或任意模型</span>
+    messages=[{
+        <span class="text-green-400">"role"</span>: <span class="text-green-400">"user"</span>,
+        <span class="text-green-400">"content"</span>: <span class="text-green-400">"你好！"</span>
+    }]
+)
+<span class="text-blue-400">print</span>(response.choices[<span class="text-amber-400">0</span>].message.content)</code></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 核心能力模块 -->
+  <section class="py-20">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="text-center mb-14">
+        <h2 class="text-2xl font-bold text-slate-900 mb-3">为什么选择 MaaS Platform</h2>
+        <p class="text-slate-500">企业级 AI 接入中间件，降低成本，提升稳定性</p>
+      </div>
+      <div class="grid grid-cols-3 gap-6">
+        <div class="feature-card bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center mb-4">
+            <i class="fa-solid fa-shuffle text-blue-600"></i>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">智能路由与负载均衡</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">基于延迟、成本、质量多维评分，自动将请求分配至最优模型。支持 Failover 兜底，保障服务连续性。</p>
+        </div>
+        <div class="feature-card bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center mb-4">
+            <i class="fa-solid fa-piggy-bank text-green-600"></i>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">成本控制与预算管理</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">项目级预算上限、实时用量监控、超限自动限流与审批工作流。比直接调用厂商 API 平均降低 40% 成本。</p>
+        </div>
+        <div class="feature-card bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center mb-4">
+            <i class="fa-solid fa-shield-halved text-amber-600"></i>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">企业级安全与合规</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">内容安全过滤、PII 脱敏、审计日志全记录。支持私有化部署，满足金融、医疗等行业合规要求。</p>
+        </div>
+        <div class="feature-card bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center mb-4">
+            <i class="fa-solid fa-plug text-blue-600"></i>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">OpenAI 格式兼容</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">100% 兼容 OpenAI SDK。修改一行 base_url 即可无缝迁移，无需改造现有业务代码。</p>
+        </div>
+        <div class="feature-card bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-green-50 flex items-center justify-center mb-4">
+            <i class="fa-solid fa-chart-line text-green-600"></i>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">全链路可观测性</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">请求追踪、Token 用量分析、延迟分布、错误率监控。支持 Prometheus 指标导出与告警集成。</p>
+        </div>
+        <div class="feature-card bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+          <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center mb-4">
+            <i class="fa-solid fa-flask text-amber-600"></i>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">Prompt 实验室 & 精调</h3>
+          <p class="text-sm text-slate-500 leading-relaxed">多模型横向对比、A/B 测试、SFT 精调任务管理。从实验到生产，一站式 MLOps 工作流。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 模型展示 -->
+  <section class="bg-white border-y border-slate-200 py-16">
+    <div class="max-w-7xl mx-auto px-6">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900">接入的主流模型</h2>
+          <p class="text-sm text-slate-500 mt-1">持续扩充，每月新增 5-10 个模型</p>
+        </div>
+        <button onclick="showPage('models')" class="text-blue-600 text-sm font-medium hover:text-blue-700 flex items-center gap-1">
+          查看全部模型 <i class="fa-solid fa-arrow-right text-xs"></i>
+        </button>
+      </div>
+      <div class="grid grid-cols-4 gap-4">
+        <!-- 模型 Logo 卡片 -->
+        <div class="border border-slate-200 rounded-xl p-4 flex items-center gap-3 hover:border-blue-200 transition-colors cursor-pointer" onclick="showPage('models')">
+          <div class="w-10 h-10 rounded-lg bg-slate-900 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-robot text-white text-sm"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-800">GPT-4o</p>
+            <p class="text-xs text-slate-400">OpenAI</p>
+          </div>
+          <span class="ml-auto text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded font-medium">热门</span>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 flex items-center gap-3 hover:border-blue-200 transition-colors cursor-pointer" onclick="showPage('models')">
+          <div class="w-10 h-10 rounded-lg bg-amber-600 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-brain text-white text-sm"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-800">Claude 3.5 Sonnet</p>
+            <p class="text-xs text-slate-400">Anthropic</p>
+          </div>
+          <span class="ml-auto text-xs bg-green-50 text-green-700 px-2 py-0.5 rounded font-medium">热门</span>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 flex items-center gap-3 hover:border-blue-200 transition-colors cursor-pointer" onclick="showPage('models')">
+          <div class="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-circle-nodes text-white text-sm"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-800">Qwen-Max</p>
+            <p class="text-xs text-slate-400">阿里云</p>
+          </div>
+          <span class="ml-auto text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">国产</span>
+        </div>
+        <div class="border border-slate-200 rounded-xl p-4 flex items-center gap-3 hover:border-blue-200 transition-colors cursor-pointer" onclick="showPage('models')">
+          <div class="w-10 h-10 rounded-lg bg-teal-700 flex items-center justify-center flex-shrink-0">
+            <i class="fa-solid fa-microchip text-white text-sm"></i>
+          </div>
+          <div>
+            <p class="text-sm font-semibold text-slate-800">DeepSeek-V3</p>
+            <p class="text-xs text-slate-400">深度求索</p>
+          </div>
+          <span class="ml-auto text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">国产</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA 底部 -->
+  <section class="py-20">
+    <div class="max-w-2xl mx-auto px-6 text-center">
+      <h2 class="text-2xl font-bold text-slate-900 mb-4">准备好开始了吗？</h2>
+      <p class="text-slate-500 mb-8">免费注册，立即获得 ¥20 体验额度，无需绑定信用卡。</p>
+      <div class="flex items-center justify-center gap-4">
+        <button onclick="showRegisterModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-sm font-semibold transition-colors">
+          免费注册
+        </button>
+        <button onclick="showPage('docs')" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-8 py-3 rounded-lg text-sm font-semibold transition-colors">
+          查看文档
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- =================== 模型广场 =================== -->
+<div id="page-models" class="page-section">
+  <div class="max-w-7xl mx-auto px-6 py-8">
+    <!-- 页面标题 -->
+    <div class="mb-6">
+      <h1 class="text-xl font-bold text-slate-900">模型广场</h1>
+      <p class="text-sm text-slate-500 mt-1">浏览并对比所有可用模型，无需登录</p>
+    </div>
+
+    <!-- 搜索 + 筛选栏 -->
+    <div class="bg-white border border-slate-200 rounded-xl p-4 mb-6 shadow-sm">
+      <div class="flex gap-4 items-center">
+        <div class="flex-1 relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+          <input type="text" placeholder="搜索模型名称、厂商或能力..."
+            class="w-full border border-slate-200 rounded-lg pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            oninput="filterModels(this.value)" />
+        </div>
+        <!-- 能力筛选 -->
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <span class="text-xs text-slate-500 font-medium">能力：</span>
+          <button onclick="toggleFilter(this,'chat')" class="filter-btn text-xs px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:border-blue-300 transition-colors" data-filter="chat">对话</button>
+          <button onclick="toggleFilter(this,'code')" class="filter-btn text-xs px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:border-blue-300 transition-colors" data-filter="code">代码</button>
+          <button onclick="toggleFilter(this,'vision')" class="filter-btn text-xs px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:border-blue-300 transition-colors" data-filter="vision">视觉</button>
+          <button onclick="toggleFilter(this,'embedding')" class="filter-btn text-xs px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:border-blue-300 transition-colors" data-filter="embedding">Embedding</button>
+        </div>
+        <!-- 排序 -->
+        <select class="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="sortModels(this.value)">
+          <option value="popular">按热度排序</option>
+          <option value="price_asc">价格从低到高</option>
+          <option value="price_desc">价格从高到低</option>
+          <option value="context">上下文长度</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- 厂商分组 -->
+    <div class="space-y-8" id="modelGroups">
+
+      <!-- OpenAI -->
+      <div class="model-group" data-vendor="openai">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-7 h-7 rounded bg-slate-900 flex items-center justify-center">
+            <i class="fa-solid fa-robot text-white text-xs"></i>
+          </div>
+          <h2 class="text-base font-semibold text-slate-800">OpenAI</h2>
+          <span class="text-xs text-slate-400">6 个模型</span>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="model-card bg-white border border-slate-200 rounded-xl p-5 shadow-sm cursor-pointer transition-all" data-caps="chat code vision" onclick="showModelDetail('gpt-4o')">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-slate-900 text-sm">gpt-4o</h3>
+                <p class="text-xs text-slate-400 mt-0.5">旗舰多模态模型</p>
+              </div>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
+                <i class="fa-solid fa-circle-check text-xs"></i> 可用
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">128k context</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">对话</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">代码</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">视觉</span>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div>
+                <p class="text-xs text-slate-400">输入</p>
+                <p class="text-sm font-semibold text-slate-800">¥0.017 / 千token</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs text-slate-400">输出</p>
+                <p class="text-sm font-semibold text-slate-800">¥0.068 / 千token</p>
+              </div>
+            </div>
+            <button onclick="event.stopPropagation(); tryInPlayground('gpt-4o')" class="mt-3 w-full text-center text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              <i class="fa-solid fa-play mr-1 text-xs"></i> 在 Playground 中试用
+            </button>
+          </div>
+
+          <div class="model-card bg-white border border-slate-200 rounded-xl p-5 shadow-sm cursor-pointer transition-all" data-caps="chat code" onclick="showModelDetail('gpt-4o-mini')">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-slate-900 text-sm">gpt-4o-mini</h3>
+                <p class="text-xs text-slate-400 mt-0.5">轻量快速版本</p>
+              </div>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
+                <i class="fa-solid fa-circle-check text-xs"></i> 可用
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">128k context</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">对话</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">代码</span>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div>
+                <p class="text-xs text-slate-400">输入</p>
+                <p class="text-sm font-semibold text-slate-800">¥0.001 / 千token</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs text-slate-400">输出</p>
+                <p class="text-sm font-semibold text-slate-800">¥0.004 / 千token</p>
+              </div>
+            </div>
+            <button onclick="event.stopPropagation(); tryInPlayground('gpt-4o-mini')" class="mt-3 w-full text-center text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              <i class="fa-solid fa-play mr-1 text-xs"></i> 在 Playground 中试用
+            </button>
+          </div>
+
+          <div class="model-card bg-white border border-slate-200 rounded-xl p-5 shadow-sm cursor-pointer transition-all" data-caps="chat code" onclick="showModelDetail('o1-mini')">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-slate-900 text-sm">o1-mini</h3>
+                <p class="text-xs text-slate-400 mt-0.5">推理增强模型</p>
+              </div>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
+                <i class="fa-solid fa-circle-check text-xs"></i> 可用
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">128k context</span>
+              <span class="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">推理</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">代码</span>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div>
+                <p class="text-xs text-slate-400">输入</p>
+                <p class="text-sm font-semibold text-slate-800">¥0.022 / 千token</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs text-slate-400">输出</p>
+                <p class="text-sm font-semibold text-slate-800">¥0.088 / 千token</p>
+              </div>
+            </div>
+            <button onclick="event.stopPropagation(); tryInPlayground('o1-mini')" class="mt-3 w-full text-center text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              <i class="fa-solid fa-play mr-1 text-xs"></i> 在 Playground 中试用
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Anthropic -->
+      <div class="model-group" data-vendor="anthropic">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-7 h-7 rounded bg-amber-600 flex items-center justify-center">
+            <i class="fa-solid fa-brain text-white text-xs"></i>
+          </div>
+          <h2 class="text-base font-semibold text-slate-800">Anthropic</h2>
+          <span class="text-xs text-slate-400">4 个模型</span>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="model-card bg-white border border-slate-200 rounded-xl p-5 shadow-sm cursor-pointer transition-all" data-caps="chat code vision" onclick="showModelDetail('claude-3-5-sonnet')">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-slate-900 text-sm">claude-3-5-sonnet</h3>
+                <p class="text-xs text-slate-400 mt-0.5">综合能力最强版</p>
+              </div>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
+                <i class="fa-solid fa-circle-check text-xs"></i> 可用
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">200k context</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">对话</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">代码</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">视觉</span>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div><p class="text-xs text-slate-400">输入</p><p class="text-sm font-semibold text-slate-800">¥0.022 / 千token</p></div>
+              <div class="text-right"><p class="text-xs text-slate-400">输出</p><p class="text-sm font-semibold text-slate-800">¥0.110 / 千token</p></div>
+            </div>
+            <button onclick="event.stopPropagation(); tryInPlayground('claude-3-5-sonnet')" class="mt-3 w-full text-center text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              <i class="fa-solid fa-play mr-1 text-xs"></i> 在 Playground 中试用
+            </button>
+          </div>
+          <div class="model-card bg-white border border-slate-200 rounded-xl p-5 shadow-sm cursor-pointer transition-all" data-caps="chat code" onclick="showModelDetail('claude-3-haiku')">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-slate-900 text-sm">claude-3-haiku</h3>
+                <p class="text-xs text-slate-400 mt-0.5">高速低成本版</p>
+              </div>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
+                <i class="fa-solid fa-circle-check text-xs"></i> 可用
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">200k context</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">对话</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">代码</span>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div><p class="text-xs text-slate-400">输入</p><p class="text-sm font-semibold text-slate-800">¥0.002 / 千token</p></div>
+              <div class="text-right"><p class="text-xs text-slate-400">输出</p><p class="text-sm font-semibold text-slate-800">¥0.006 / 千token</p></div>
+            </div>
+            <button onclick="event.stopPropagation(); tryInPlayground('claude-3-haiku')" class="mt-3 w-full text-center text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              <i class="fa-solid fa-play mr-1 text-xs"></i> 在 Playground 中试用
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 国产模型 -->
+      <div class="model-group" data-vendor="domestic">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="w-7 h-7 rounded bg-blue-600 flex items-center justify-center">
+            <i class="fa-solid fa-flag text-white text-xs"></i>
+          </div>
+          <h2 class="text-base font-semibold text-slate-800">国产模型</h2>
+          <span class="text-xs text-slate-400">20+ 个模型</span>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+          <div class="model-card bg-white border border-slate-200 rounded-xl p-5 shadow-sm cursor-pointer transition-all" data-caps="chat code" onclick="showModelDetail('qwen-max')">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-slate-900 text-sm">qwen-max</h3>
+                <p class="text-xs text-slate-400 mt-0.5">通义千问旗舰版</p>
+              </div>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
+                <i class="fa-solid fa-circle-check text-xs"></i> 可用
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">32k context</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">对话</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">代码</span>
+              <span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">中文优化</span>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div><p class="text-xs text-slate-400">输入</p><p class="text-sm font-semibold text-slate-800">¥0.040 / 千token</p></div>
+              <div class="text-right"><p class="text-xs text-slate-400">输出</p><p class="text-sm font-semibold text-slate-800">¥0.120 / 千token</p></div>
+            </div>
+            <button onclick="event.stopPropagation(); tryInPlayground('qwen-max')" class="mt-3 w-full text-center text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              <i class="fa-solid fa-play mr-1 text-xs"></i> 在 Playground 中试用
+            </button>
+          </div>
+          <div class="model-card bg-white border border-slate-200 rounded-xl p-5 shadow-sm cursor-pointer transition-all" data-caps="chat code" onclick="showModelDetail('deepseek-v3')">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-slate-900 text-sm">deepseek-v3</h3>
+                <p class="text-xs text-slate-400 mt-0.5">深度求索最新版</p>
+              </div>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
+                <i class="fa-solid fa-circle-check text-xs"></i> 可用
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">64k context</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">对话</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">代码</span>
+              <span class="text-xs bg-amber-50 text-amber-600 px-2 py-0.5 rounded">推理</span>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div><p class="text-xs text-slate-400">输入</p><p class="text-sm font-semibold text-slate-800">¥0.002 / 千token</p></div>
+              <div class="text-right"><p class="text-xs text-slate-400">输出</p><p class="text-sm font-semibold text-slate-800">¥0.008 / 千token</p></div>
+            </div>
+            <button onclick="event.stopPropagation(); tryInPlayground('deepseek-v3')" class="mt-3 w-full text-center text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              <i class="fa-solid fa-play mr-1 text-xs"></i> 在 Playground 中试用
+            </button>
+          </div>
+          <div class="model-card bg-white border border-slate-200 rounded-xl p-5 shadow-sm cursor-pointer transition-all" data-caps="chat code" onclick="showModelDetail('glm-4-air')">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <h3 class="font-semibold text-slate-900 text-sm">glm-4-air</h3>
+                <p class="text-xs text-slate-400 mt-0.5">智谱 AI 轻量版</p>
+              </div>
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">
+                <i class="fa-solid fa-circle-check text-xs"></i> 可用
+              </span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mb-4">
+              <span class="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">128k context</span>
+              <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">对话</span>
+              <span class="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded">中文优化</span>
+            </div>
+            <div class="flex items-center justify-between pt-3 border-t border-slate-100">
+              <div><p class="text-xs text-slate-400">输入</p><p class="text-sm font-semibold text-slate-800">¥0.001 / 千token</p></div>
+              <div class="text-right"><p class="text-xs text-slate-400">输出</p><p class="text-sm font-semibold text-slate-800">¥0.001 / 千token</p></div>
+            </div>
+            <button onclick="event.stopPropagation(); tryInPlayground('glm-4-air')" class="mt-3 w-full text-center text-xs text-blue-600 hover:text-blue-700 font-medium py-1.5 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              <i class="fa-solid fa-play mr-1 text-xs"></i> 在 Playground 中试用
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /modelGroups -->
+  </div>
+</div>
+
+<!-- =================== Playground =================== -->
+<div id="page-playground" class="page-section">
+  <div class="max-w-6xl mx-auto px-6 py-8">
+    <div class="mb-5 flex items-start justify-between">
+      <div>
+        <h1 class="text-xl font-bold text-slate-900">Playground</h1>
+        <p class="text-sm text-slate-500 mt-1">无需登录即可体验，每位访客每天 10 次免费调用</p>
+      </div>
+    </div>
+
+    <!-- 试用额度提示条 -->
+    <div id="playTrialBanner" class="flex items-center gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-5 text-sm">
+      <i class="fa-solid fa-triangle-exclamation text-amber-500"></i>
+      <span class="text-amber-800">
+        您正在以访客身份体验，今日剩余 <strong id="trialCount">8</strong> 次免费调用。
+        <button onclick="showRegisterModal()" class="text-blue-600 hover:text-blue-700 font-medium ml-1">注册账号</button>
+        获取更多配额。
+      </span>
+      <button onclick="document.getElementById('playTrialBanner').style.opacity='0'" class="ml-auto text-amber-400 hover:text-amber-600">
+        <i class="fa-solid fa-xmark text-sm"></i>
+      </button>
+    </div>
+
+    <div class="flex gap-5 h-[calc(100vh-240px)]">
+      <!-- 左侧：参数配置面板 -->
+      <div class="w-72 flex-shrink-0 bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
+        <div class="px-4 py-3 border-b border-slate-200">
+          <p class="text-sm font-semibold text-slate-800">配置</p>
+        </div>
+        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-5">
+          <!-- 模型选择 -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">模型</label>
+            <select id="pgModel" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="gpt-4o">gpt-4o</option>
+              <option value="gpt-4o-mini">gpt-4o-mini</option>
+              <option value="claude-3-5-sonnet">claude-3-5-sonnet</option>
+              <option value="claude-3-haiku">claude-3-haiku</option>
+              <option value="qwen-max">qwen-max</option>
+              <option value="deepseek-v3">deepseek-v3</option>
+              <option value="glm-4-air">glm-4-air</option>
+            </select>
+          </div>
+          <!-- System Prompt -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">System Prompt</label>
+            <textarea id="pgSystem" rows="4" placeholder="你是一个有用的 AI 助手..."
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+            >你是一个有用、准确、友好的 AI 助手，使用中文回复用户。</textarea>
+          </div>
+          <!-- Temperature -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-medium text-slate-700">Temperature</label>
+              <span id="tempVal" class="text-xs text-slate-500 font-mono">0.7</span>
+            </div>
+            <input type="range" min="0" max="2" step="0.1" value="0.7" class="w-full accent-blue-600"
+              oninput="document.getElementById('tempVal').textContent=this.value" />
+            <div class="flex justify-between text-xs text-slate-400 mt-0.5">
+              <span>精确</span><span>创意</span>
+            </div>
+          </div>
+          <!-- Max Tokens -->
+          <div>
+            <label class="block text-xs font-medium text-slate-700 mb-1.5">Max Tokens</label>
+            <input type="number" value="2048" min="1" max="4096"
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <!-- Top-P -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-xs font-medium text-slate-700">Top-P</label>
+              <span id="topPVal" class="text-xs text-slate-500 font-mono">1.0</span>
+            </div>
+            <input type="range" min="0" max="1" step="0.05" value="1" class="w-full accent-blue-600"
+              oninput="document.getElementById('topPVal').textContent=parseFloat(this.value).toFixed(2)" />
+          </div>
+        </div>
+        <div class="px-4 py-3 border-t border-slate-200">
+          <button onclick="clearChat()" class="w-full text-xs text-slate-500 hover:text-red-600 transition-colors py-1.5 border border-slate-200 rounded-lg hover:border-red-200 hover:bg-red-50">
+            <i class="fa-solid fa-trash-can mr-1"></i> 清空对话
+          </button>
+        </div>
+      </div>
+
+      <!-- 右侧：对话区 -->
+      <div class="flex-1 flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <!-- 对话历史 -->
+        <div id="chatHistory" class="flex-1 overflow-y-auto px-6 py-5 space-y-4">
+          <!-- 欢迎消息 -->
+          <div class="flex items-start gap-3">
+            <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <i class="fa-solid fa-bolt text-white text-xs"></i>
+            </div>
+            <div class="chat-bubble-ai rounded-xl px-4 py-3 max-w-[80%]">
+              <p class="text-sm text-slate-700 leading-relaxed">你好！我是 MaaS Platform 上的 AI 助手，今天可以帮你做什么？</p>
+              <p class="text-xs text-slate-400 mt-2">当前模型：<span id="currentModelLabel" class="font-medium text-slate-500">gpt-4o</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 输入区 -->
+        <div class="border-t border-slate-200 p-4">
+          <div class="flex gap-3 items-end">
+            <textarea id="chatInput" rows="2" placeholder="输入消息，Shift+Enter 换行，Enter 发送..."
+              class="flex-1 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none leading-relaxed"
+              onkeydown="handleChatKeydown(event)"></textarea>
+            <button onclick="sendMessage()" id="sendBtn"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl text-sm font-medium transition-colors flex items-center gap-2 flex-shrink-0">
+              <i class="fa-solid fa-paper-plane"></i>
+              发送
+            </button>
+          </div>
+          <div class="flex items-center justify-between mt-2">
+            <p class="text-xs text-slate-400">本次对话数据不会被存储或用于训练</p>
+            <div id="pgTokenCount" class="text-xs text-slate-400 font-mono hidden">
+              <i class="fa-solid fa-database mr-1"></i>
+              <span id="tokenIn">0</span> in / <span id="tokenOut">0</span> out tokens
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== 文档 =================== -->
+<div id="page-docs" class="page-section">
+  <div class="max-w-6xl mx-auto px-6 py-10">
+    <div class="mb-8">
+      <h1 class="text-2xl font-bold text-slate-900">开发者文档</h1>
+      <p class="text-slate-500 mt-2">从接入指南到 API 参考，快速找到所需内容</p>
+    </div>
+
+    <!-- 搜索框 -->
+    <div class="bg-white border border-slate-200 rounded-xl p-4 mb-10 shadow-sm">
+      <div class="relative">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input type="text" placeholder="搜索文档内容（例如：如何获取 API Key、限流策略...）"
+          class="w-full border-0 bg-transparent pl-10 pr-4 py-2 text-sm focus:outline-none text-slate-700 placeholder:text-slate-400" />
+      </div>
+    </div>
+
+    <!-- 快速开始 -->
+    <div class="mb-10">
+      <h2 class="text-base font-semibold text-slate-800 mb-4">
+        <i class="fa-solid fa-rocket text-blue-500 mr-2"></i>快速开始
+      </h2>
+      <div class="grid grid-cols-3 gap-4">
+        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-blue-200 cursor-pointer transition-colors" onclick="showDocDetail('quickstart')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+              <i class="fa-solid fa-plug text-blue-600 text-sm"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-800">快速接入指南</h3>
+          </div>
+          <p class="text-xs text-slate-500 leading-relaxed">5 分钟内完成第一次 API 调用，支持 Python、Node.js、cURL</p>
+          <div class="flex items-center gap-1 mt-3 text-xs text-blue-600 font-medium">
+            <span>阅读文档</span><i class="fa-solid fa-arrow-right text-xs"></i>
+          </div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-blue-200 cursor-pointer transition-colors" onclick="showDocDetail('auth')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-green-50 flex items-center justify-center">
+              <i class="fa-solid fa-key text-green-600 text-sm"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-800">API Key 管理</h3>
+          </div>
+          <p class="text-xs text-slate-500 leading-relaxed">创建、管理和配置 API Key，了解权限控制和安全最佳实践</p>
+          <div class="flex items-center gap-1 mt-3 text-xs text-blue-600 font-medium">
+            <span>阅读文档</span><i class="fa-solid fa-arrow-right text-xs"></i>
+          </div>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm hover:border-blue-200 cursor-pointer transition-colors" onclick="showDocDetail('sdk')">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center">
+              <i class="fa-solid fa-box-open text-amber-600 text-sm"></i>
+            </div>
+            <h3 class="text-sm font-semibold text-slate-800">SDK 开发指南</h3>
+          </div>
+          <p class="text-xs text-slate-500 leading-relaxed">官方 Python/Node.js SDK，支持流式输出、重试、超时配置</p>
+          <div class="flex items-center gap-1 mt-3 text-xs text-blue-600 font-medium">
+            <span>阅读文档</span><i class="fa-solid fa-arrow-right text-xs"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 文档分类 -->
+    <div class="grid grid-cols-2 gap-8">
+      <!-- API 参考 -->
+      <div>
+        <h2 class="text-base font-semibold text-slate-800 mb-4">
+          <i class="fa-solid fa-code text-slate-400 mr-2"></i>API 参考
+        </h2>
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div class="divide-y divide-slate-100">
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors" onclick="showDocDetail('chat-completions')">
+              <div class="flex items-center gap-3">
+                <span class="inline-block px-1.5 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 font-mono w-12 text-center">POST</span>
+                <span class="text-sm text-slate-700">/chat/completions</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors" onclick="showDocDetail('completions')">
+              <div class="flex items-center gap-3">
+                <span class="inline-block px-1.5 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 font-mono w-12 text-center">POST</span>
+                <span class="text-sm text-slate-700">/completions</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors" onclick="showDocDetail('embeddings')">
+              <div class="flex items-center gap-3">
+                <span class="inline-block px-1.5 py-0.5 rounded text-xs font-bold bg-green-100 text-green-700 font-mono w-12 text-center">POST</span>
+                <span class="text-sm text-slate-700">/embeddings</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors" onclick="showDocDetail('models-list')">
+              <div class="flex items-center gap-3">
+                <span class="inline-block px-1.5 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 font-mono w-12 text-center">GET</span>
+                <span class="text-sm text-slate-700">/models</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors">
+              <div class="flex items-center gap-3">
+                <span class="inline-block px-1.5 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 font-mono w-12 text-center">GET</span>
+                <span class="text-sm text-slate-700">/usage</span>
+              </div>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 指南 -->
+      <div>
+        <h2 class="text-base font-semibold text-slate-800 mb-4">
+          <i class="fa-solid fa-book text-slate-400 mr-2"></i>指南
+        </h2>
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div class="divide-y divide-slate-100">
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors" onclick="showDocDetail('streaming')">
+              <span class="text-sm text-slate-700">流式输出（Streaming）</span>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors" onclick="showDocDetail('error-handling')">
+              <span class="text-sm text-slate-700">错误处理与重试策略</span>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors" onclick="showDocDetail('rate-limit')">
+              <span class="text-sm text-slate-700">限流规则与配额说明</span>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors" onclick="showDocDetail('routing')">
+              <span class="text-sm text-slate-700">路由策略配置</span>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors" onclick="showDocDetail('migration')">
+              <span class="text-sm text-slate-700">从 OpenAI 迁移指南</span>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cookbook -->
+      <div>
+        <h2 class="text-base font-semibold text-slate-800 mb-4">
+          <i class="fa-solid fa-utensils text-slate-400 mr-2"></i>Cookbook 示例
+        </h2>
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div class="divide-y divide-slate-100">
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors">
+              <span class="text-sm text-slate-700">构建 RAG 知识问答系统</span>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors">
+              <span class="text-sm text-slate-700">多模型成本优化路由配置</span>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors">
+              <span class="text-sm text-slate-700">Function Calling 最佳实践</span>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors">
+              <span class="text-sm text-slate-700">使用 Embedding 构建语义搜索</span>
+              <i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 更新日志 -->
+      <div>
+        <h2 class="text-base font-semibold text-slate-800 mb-4">
+          <i class="fa-solid fa-clock-rotate-left text-slate-400 mr-2"></i>更新日志
+        </h2>
+        <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+          <div class="divide-y divide-slate-100">
+            <div class="px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-mono text-slate-400">2026-05-15</span>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">新功能</span>
+              </div>
+              <p class="text-sm text-slate-700">新增 DeepSeek-R2 模型支持，推理性能提升 40%</p>
+            </div>
+            <div class="px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-mono text-slate-400">2026-05-10</span>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">改进</span>
+              </div>
+              <p class="text-sm text-slate-700">路由策略支持 YAML DSL 导入导出，新增表单配置模式</p>
+            </div>
+            <div class="px-4 py-3 hover:bg-slate-50 cursor-pointer transition-colors">
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-mono text-slate-400">2026-05-01</span>
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">修复</span>
+              </div>
+              <p class="text-sm text-slate-700">修复高并发下 Embedding 接口偶发超时问题</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== 定价页 =================== -->
+<div id="page-pricing" class="page-section">
+  <div class="max-w-5xl mx-auto px-6 py-12">
+    <div class="text-center mb-12">
+      <h1 class="text-2xl font-bold text-slate-900 mb-3">透明、按量计费</h1>
+      <p class="text-slate-500">按实际 Token 用量付费，无最低消费，随时开始、随时停止</p>
+    </div>
+
+    <!-- 套餐卡片 -->
+    <div class="grid grid-cols-3 gap-6 mb-12">
+      <!-- 免费版 -->
+      <div class="bg-white border border-slate-200 rounded-xl p-7 shadow-sm">
+        <p class="text-sm font-semibold text-slate-500 mb-2">免费版</p>
+        <p class="text-3xl font-bold text-slate-900 mb-1">¥0</p>
+        <p class="text-xs text-slate-400 mb-6">永久免费，无需信用卡</p>
+        <ul class="space-y-3 mb-8 text-sm text-slate-600">
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i>¥20 体验额度（一次性）</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i>所有模型均可访问</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i>按量付费（充值后继续用）</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i>社区支持</li>
+          <li class="flex items-center gap-2 text-slate-400"><i class="fa-solid fa-xmark text-xs"></i>SLA 保障</li>
+          <li class="flex items-center gap-2 text-slate-400"><i class="fa-solid fa-xmark text-xs"></i>团队协作</li>
+        </ul>
+        <button onclick="showRegisterModal()" class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-2.5 rounded-lg text-sm font-medium transition-colors">
+          免费注册
+        </button>
+      </div>
+
+      <!-- 企业版 -->
+      <div class="bg-blue-600 border border-blue-600 rounded-xl p-7 shadow-sm relative">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1 rounded-full">推荐</div>
+        <p class="text-sm font-semibold text-blue-200 mb-2">企业版</p>
+        <p class="text-3xl font-bold text-white mb-1">按量计费</p>
+        <p class="text-xs text-blue-200 mb-6">充值即用，低至 9 折优惠</p>
+        <ul class="space-y-3 mb-8 text-sm text-blue-100">
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-200 text-xs"></i>包含免费版全部功能</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-200 text-xs"></i>月消费 ¥1k+ 享 9.5 折</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-200 text-xs"></i>月消费 ¥5k+ 享 9 折</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-200 text-xs"></i>99.9% SLA 保障</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-200 text-xs"></i>团队多成员协作</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-blue-200 text-xs"></i>优先工单支持</li>
+        </ul>
+        <button onclick="showRegisterModal()" class="w-full bg-white text-blue-600 hover:bg-blue-50 py-2.5 rounded-lg text-sm font-semibold transition-colors">
+          立即开始
+        </button>
+      </div>
+
+      <!-- 私有化 -->
+      <div class="bg-white border border-slate-200 rounded-xl p-7 shadow-sm">
+        <p class="text-sm font-semibold text-slate-500 mb-2">私有化部署</p>
+        <p class="text-3xl font-bold text-slate-900 mb-1">定制报价</p>
+        <p class="text-xs text-slate-400 mb-6">联系商务获取报价</p>
+        <ul class="space-y-3 mb-8 text-sm text-slate-600">
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i>包含企业版全部功能</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i>部署至您的云/本地环境</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i>数据完全自主</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i>合规定制（金融/医疗）</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i>专属客户成功经理</li>
+          <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500 text-xs"></i>7×24 技术支持</li>
+        </ul>
+        <button class="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 py-2.5 rounded-lg text-sm font-medium transition-colors">
+          联系商务
+        </button>
+      </div>
+    </div>
+
+    <!-- 热门模型定价表 -->
+    <div>
+      <h2 class="text-base font-semibold text-slate-800 mb-4">热门模型价格一览</h2>
+      <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-slate-50 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th class="text-left px-5 py-3">模型</th>
+              <th class="text-left px-5 py-3">厂商</th>
+              <th class="text-right px-5 py-3">输入 / 千 token</th>
+              <th class="text-right px-5 py-3">输出 / 千 token</th>
+              <th class="text-right px-5 py-3">上下文</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-5 py-3 font-medium text-slate-800">gpt-4o</td>
+              <td class="px-5 py-3 text-slate-500">OpenAI</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.017</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.068</td>
+              <td class="px-5 py-3 text-right text-slate-500">128k</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-5 py-3 font-medium text-slate-800">gpt-4o-mini</td>
+              <td class="px-5 py-3 text-slate-500">OpenAI</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.001</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.004</td>
+              <td class="px-5 py-3 text-right text-slate-500">128k</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-5 py-3 font-medium text-slate-800">claude-3-5-sonnet</td>
+              <td class="px-5 py-3 text-slate-500">Anthropic</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.022</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.110</td>
+              <td class="px-5 py-3 text-right text-slate-500">200k</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-5 py-3 font-medium text-slate-800">qwen-max</td>
+              <td class="px-5 py-3 text-slate-500">阿里云</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.040</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.120</td>
+              <td class="px-5 py-3 text-right text-slate-500">32k</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-5 py-3 font-medium text-slate-800">deepseek-v3</td>
+              <td class="px-5 py-3 text-slate-500">深度求索</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.002</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.008</td>
+              <td class="px-5 py-3 text-right text-slate-500">64k</td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-5 py-3 font-medium text-slate-800">glm-4-air</td>
+              <td class="px-5 py-3 text-slate-500">智谱 AI</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.001</td>
+              <td class="px-5 py-3 text-right font-mono text-slate-700">¥0.001</td>
+              <td class="px-5 py-3 text-right text-slate-500">128k</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-xs text-slate-400 mt-3">
+        <i class="fa-solid fa-circle-info mr-1"></i>
+        以上价格为调用 MaaS Platform 统一入口的标准价格，已包含路由、监控等增值服务。企业合同价另议。
+      </p>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<!-- ===== 页脚 ===== -->
+<footer class="bg-white border-t border-slate-200 mt-16">
+  <div class="max-w-7xl mx-auto px-6 py-10">
+    <div class="grid grid-cols-5 gap-8 mb-8">
+      <div class="col-span-2">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="fa-solid fa-bolt text-blue-600"></i>
+          <span class="font-bold text-slate-900">MaaS Platform</span>
+        </div>
+        <p class="text-sm text-slate-500 leading-relaxed">企业级 AI 模型服务接入平台，统一 API 接入 60+ 主流大模型，内置路由、成本控制与可观测性。</p>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-3">产品</p>
+        <ul class="space-y-2 text-sm text-slate-500">
+          <li><button onclick="showPage('models')" class="hover:text-slate-800 transition-colors">模型广场</button></li>
+          <li><button onclick="showPage('playground')" class="hover:text-slate-800 transition-colors">Playground</button></li>
+          <li><button onclick="showPage('pricing')" class="hover:text-slate-800 transition-colors">定价</button></li>
+          <li><a href="#" class="hover:text-slate-800 transition-colors">更新日志</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-3">开发者</p>
+        <ul class="space-y-2 text-sm text-slate-500">
+          <li><button onclick="showPage('docs')" class="hover:text-slate-800 transition-colors">文档</button></li>
+          <li><a href="#" class="hover:text-slate-800 transition-colors">API 参考</a></li>
+          <li><a href="#" class="hover:text-slate-800 transition-colors">SDK</a></li>
+          <li><a href="#" class="hover:text-slate-800 transition-colors">状态页</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-3">公司</p>
+        <ul class="space-y-2 text-sm text-slate-500">
+          <li><a href="#" class="hover:text-slate-800 transition-colors">关于我们</a></li>
+          <li><a href="#" class="hover:text-slate-800 transition-colors">联系我们</a></li>
+          <li><a href="#" class="hover:text-slate-800 transition-colors">隐私政策</a></li>
+          <li><a href="#" class="hover:text-slate-800 transition-colors">服务条款</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-slate-100 pt-6 flex items-center justify-between">
+      <p class="text-xs text-slate-400">© 2026 MaaS Platform. All rights reserved.</p>
+      <p class="text-xs text-slate-400">沪ICP备XXXXXX号</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ===== 登录弹窗 ===== -->
+<div id="loginModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] hidden">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+      <h3 class="text-base font-semibold text-slate-900">登录 MaaS Platform</h3>
+      <button onclick="closeModal('loginModal')" class="text-slate-400 hover:text-slate-600 transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="px-6 py-6 space-y-4">
+      <!-- SSO 快捷登录 -->
+      <div class="grid grid-cols-2 gap-3">
+        <button class="flex items-center justify-center gap-2 border border-slate-200 rounded-lg py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+          <i class="fa-brands fa-google text-red-500"></i>
+          Google SSO
+        </button>
+        <button class="flex items-center justify-center gap-2 border border-slate-200 rounded-lg py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+          <i class="fa-regular fa-building text-blue-500"></i>
+          企业 SSO
+        </button>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex-1 h-px bg-slate-200"></div>
+        <span class="text-xs text-slate-400">或邮箱登录</span>
+        <div class="flex-1 h-px bg-slate-200"></div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">邮箱</label>
+        <input type="email" placeholder="your@company.com"
+          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+      </div>
+      <div>
+        <div class="flex items-center justify-between mb-1.5">
+          <label class="block text-sm font-medium text-slate-700">密码</label>
+          <a href="#" class="text-xs text-blue-600 hover:text-blue-700">忘记密码？</a>
+        </div>
+        <input type="password" placeholder="请输入密码"
+          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+      </div>
+    </div>
+    <div class="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
+      <p class="text-sm text-slate-500">
+        没有账号？
+        <button onclick="closeModal('loginModal'); showRegisterModal()" class="text-blue-600 hover:text-blue-700 font-medium">免费注册</button>
+      </p>
+      <button onclick="closeModal('loginModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">
+        登录
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 注册弹窗 ===== -->
+<div id="registerModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] hidden">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+      <h3 class="text-base font-semibold text-slate-900">免费注册</h3>
+      <button onclick="closeModal('registerModal')" class="text-slate-400 hover:text-slate-600 transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="px-6 py-6 space-y-4">
+      <div class="bg-blue-50 border border-blue-100 rounded-lg px-4 py-3 flex items-center gap-2">
+        <i class="fa-solid fa-gift text-blue-600 text-sm"></i>
+        <p class="text-sm text-blue-700">注册即送 <strong>¥20</strong> 体验额度，无需信用卡</p>
+      </div>
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">姓名 <span class="text-red-500">*</span></label>
+          <input type="text" placeholder="张三"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">公司名称</label>
+          <input type="text" placeholder="可选"
+            class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        </div>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">邮箱 <span class="text-red-500">*</span></label>
+        <input type="email" placeholder="your@company.com"
+          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">密码 <span class="text-red-500">*</span></label>
+        <input type="password" placeholder="至少 8 位，包含字母和数字"
+          class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-slate-700 mb-1.5">手机号（可选，用于接收告警）</label>
+        <div class="flex gap-2">
+          <select class="border border-slate-200 rounded-lg px-2 py-2 text-sm focus:outline-none w-24">
+            <option>+86</option><option>+1</option><option>+44</option>
+          </select>
+          <input type="tel" placeholder="138 0000 0000"
+            class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
+        </div>
+      </div>
+      <label class="flex items-start gap-2 cursor-pointer">
+        <input type="checkbox" class="mt-0.5 accent-blue-600" checked />
+        <span class="text-xs text-slate-500 leading-relaxed">
+          我已阅读并同意
+          <a href="#" class="text-blue-600 hover:underline">服务条款</a>
+          和
+          <a href="#" class="text-blue-600 hover:underline">隐私政策</a>
+        </span>
+      </label>
+    </div>
+    <div class="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
+      <p class="text-sm text-slate-500">
+        已有账号？
+        <button onclick="closeModal('registerModal'); showLoginModal()" class="text-blue-600 hover:text-blue-700 font-medium">直接登录</button>
+      </p>
+      <button onclick="closeModal('registerModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors">
+        注册
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 模型详情弹窗 ===== -->
+<div id="modelDetailModal" class="fixed inset-0 bg-black/40 flex items-center justify-center z-[100] hidden">
+  <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[85vh] flex flex-col">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 flex-shrink-0">
+      <div>
+        <h3 id="mdName" class="text-base font-semibold text-slate-900">gpt-4o</h3>
+        <p id="mdVendor" class="text-xs text-slate-400 mt-0.5">OpenAI</p>
+      </div>
+      <button onclick="closeModal('modelDetailModal')" class="text-slate-400 hover:text-slate-600 transition-colors">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+    <div class="flex-1 overflow-y-auto px-6 py-5">
+      <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="bg-slate-50 rounded-lg p-3 text-center">
+          <p class="text-xs text-slate-400 mb-1">上下文</p>
+          <p id="mdContext" class="text-sm font-bold text-slate-800">128k</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-3 text-center">
+          <p class="text-xs text-slate-400 mb-1">输入价格</p>
+          <p id="mdPriceIn" class="text-sm font-bold text-slate-800">¥0.017/k</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-3 text-center">
+          <p class="text-xs text-slate-400 mb-1">输出价格</p>
+          <p id="mdPriceOut" class="text-sm font-bold text-slate-800">¥0.068/k</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-3 text-center">
+          <p class="text-xs text-slate-400 mb-1">平均延迟</p>
+          <p id="mdLatency" class="text-sm font-bold text-slate-800">780ms</p>
+        </div>
+      </div>
+      <div class="mb-5">
+        <h4 class="text-sm font-semibold text-slate-800 mb-2">模型能力</h4>
+        <div id="mdCaps" class="flex flex-wrap gap-2"></div>
+      </div>
+      <div>
+        <h4 class="text-sm font-semibold text-slate-800 mb-3">快速调用示例</h4>
+        <pre class="text-xs"><code id="mdCode"></code></pre>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl flex-shrink-0">
+      <button onclick="closeModal('modelDetailModal')" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+        关闭
+      </button>
+      <button onclick="closeModal('modelDetailModal'); showPage('playground')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+        <i class="fa-solid fa-play text-xs"></i>
+        在 Playground 中试用
+      </button>
+      <button onclick="showRegisterModal()" class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors ml-auto">
+        注册后使用完整功能
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== JavaScript ===== -->
+<script>
+// ── 页面路由 ──────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll('.page-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+  const section = document.getElementById('page-' + name);
+  const navBtn = document.getElementById('nav-' + name);
+  if (section) section.classList.add('active');
+  if (navBtn) navBtn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ── 弹窗 ──────────────────────────────────────────────
+function showLoginModal() {
+  document.getElementById('loginModal').classList.remove('hidden');
+}
+function showRegisterModal() {
+  document.getElementById('registerModal').classList.remove('hidden');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.add('hidden');
+}
+// 点击遮罩关闭
+['loginModal','registerModal','modelDetailModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) closeModal(id);
+  });
+});
+
+// ── 模型广场：筛选 ────────────────────────────────────
+let activeFilters = new Set();
+function toggleFilter(btn, cap) {
+  if (activeFilters.has(cap)) {
+    activeFilters.delete(cap);
+    btn.classList.remove('border-blue-500','text-blue-600','bg-blue-50');
+    btn.classList.add('border-slate-200','text-slate-600');
+  } else {
+    activeFilters.add(cap);
+    btn.classList.add('border-blue-500','text-blue-600','bg-blue-50');
+    btn.classList.remove('border-slate-200','text-slate-600');
+  }
+  applyModelFilters();
+}
+function filterModels(q) {
+  applyModelFilters(q);
+}
+function applyModelFilters(q = '') {
+  q = q.toLowerCase();
+  document.querySelectorAll('.model-card').forEach(card => {
+    const caps = card.dataset.caps || '';
+    const name = card.querySelector('h3').textContent.toLowerCase();
+    const capMatch = activeFilters.size === 0 || [...activeFilters].every(f => caps.includes(f));
+    const nameMatch = !q || name.includes(q);
+    card.style.display = (capMatch && nameMatch) ? '' : 'none';
+  });
+}
+function sortModels(by) {
+  // 简单 mock 排序反馈
+  const msg = { popular:'已按热度排序', price_asc:'已按价格从低到高排序', price_desc:'已按价格从高到低排序', context:'已按上下文长度排序' };
+  console.log(msg[by] || '');
+}
+
+// ── 模型详情弹窗 ──────────────────────────────────────
+const modelData = {
+  'gpt-4o': { vendor:'OpenAI', context:'128k', priceIn:'¥0.017/k', priceOut:'¥0.068/k', latency:'780ms', caps:['对话','代码','视觉','函数调用'] },
+  'gpt-4o-mini': { vendor:'OpenAI', context:'128k', priceIn:'¥0.001/k', priceOut:'¥0.004/k', latency:'320ms', caps:['对话','代码','函数调用'] },
+  'o1-mini': { vendor:'OpenAI', context:'128k', priceIn:'¥0.022/k', priceOut:'¥0.088/k', latency:'5200ms', caps:['推理','代码','数学'] },
+  'claude-3-5-sonnet': { vendor:'Anthropic', context:'200k', priceIn:'¥0.022/k', priceOut:'¥0.110/k', latency:'1200ms', caps:['对话','代码','视觉','长文档'] },
+  'claude-3-haiku': { vendor:'Anthropic', context:'200k', priceIn:'¥0.002/k', priceOut:'¥0.006/k', latency:'400ms', caps:['对话','代码'] },
+  'qwen-max': { vendor:'阿里云', context:'32k', priceIn:'¥0.040/k', priceOut:'¥0.120/k', latency:'950ms', caps:['对话','代码','中文优化'] },
+  'deepseek-v3': { vendor:'深度求索', context:'64k', priceIn:'¥0.002/k', priceOut:'¥0.008/k', latency:'680ms', caps:['对话','代码','推理'] },
+  'glm-4-air': { vendor:'智谱 AI', context:'128k', priceIn:'¥0.001/k', priceOut:'¥0.001/k', latency:'460ms', caps:['对话','中文优化'] },
+};
+function showModelDetail(name) {
+  const d = modelData[name];
+  if (!d) return;
+  document.getElementById('mdName').textContent = name;
+  document.getElementById('mdVendor').textContent = d.vendor;
+  document.getElementById('mdContext').textContent = d.context;
+  document.getElementById('mdPriceIn').textContent = d.priceIn;
+  document.getElementById('mdPriceOut').textContent = d.priceOut;
+  document.getElementById('mdLatency').textContent = d.latency;
+  const capsEl = document.getElementById('mdCaps');
+  capsEl.innerHTML = d.caps.map(c => `<span class="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-medium">${c}</span>`).join('');
+  document.getElementById('mdCode').textContent =
+`from openai import OpenAI
+client = OpenAI(api_key="sk-maas-xxx", base_url="https://api.maas.io/v1")
+
+response = client.chat.completions.create(
+    model="${name}",
+    messages=[{"role": "user", "content": "你好！"}]
+)
+print(response.choices[0].message.content)`;
+  document.getElementById('modelDetailModal').classList.remove('hidden');
+}
+function tryInPlayground(model) {
+  document.getElementById('pgModel').value = model;
+  document.getElementById('currentModelLabel').textContent = model;
+  showPage('playground');
+}
+
+// ── Playground ─────────────────────────────────────────
+let trialRemaining = 8;
+let isStreaming = false;
+const mockResponses = {
+  default: [
+    "我是基于 MaaS Platform 接入的 AI 助手。您的问题很有意思！让我来分析一下...\n\n根据您的描述，这个问题可以从以下几个角度来思考：\n\n1. **首先**，我们需要明确核心目标\n2. **其次**，考虑现有的约束条件\n3. **最后**，制定可执行的方案\n\n如果您需要更详细的解答，请提供更多背景信息。",
+    "这是一个很好的问题！基于我的理解，这里有几点重要的考虑：\n\n```python\n# 示例代码\nresult = process(input_data)\nprint(f'处理结果：{result}')\n```\n\n以上代码展示了基本思路。您可以根据实际需求进行调整。",
+    "感谢您的问题。从技术角度来看，这涉及到几个关键概念：\n\n- **性能优化**：减少不必要的计算\n- **可扩展性**：设计时考虑未来增长\n- **可维护性**：保持代码清晰易读\n\n希望这个回答对您有帮助！如有疑问，欢迎继续追问。"
+  ]
+};
+let respIndex = 0;
+
+function handleChatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function sendMessage() {
+  if (isStreaming) return;
+  if (trialRemaining <= 0) {
+    showRegisterModal();
+    return;
+  }
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  const model = document.getElementById('pgModel').value;
+  document.getElementById('currentModelLabel').textContent = model;
+  // 用户消息
+  appendMessage('user', text);
+  trialRemaining--;
+  document.getElementById('trialCount').textContent = trialRemaining;
+  // 模拟 AI 流式回复
+  isStreaming = true;
+  document.getElementById('sendBtn').disabled = true;
+  const resp = mockResponses.default[respIndex % mockResponses.default.length];
+  respIndex++;
+  appendStreamingMessage(resp, () => {
+    isStreaming = false;
+    document.getElementById('sendBtn').disabled = false;
+    document.getElementById('pgTokenCount').classList.remove('hidden');
+    document.getElementById('tokenIn').textContent = Math.floor(Math.random() * 200 + 50);
+    document.getElementById('tokenOut').textContent = Math.floor(Math.random() * 300 + 100);
+  });
+}
+
+function appendMessage(role, text) {
+  const history = document.getElementById('chatHistory');
+  const div = document.createElement('div');
+  div.className = 'flex items-start gap-3';
+  if (role === 'user') {
+    div.innerHTML = `
+      <div class="flex-1 flex justify-end">
+        <div class="chat-bubble-user rounded-xl px-4 py-3 max-w-[75%]">
+          <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">${escapeHtml(text)}</p>
+        </div>
+      </div>
+      <div class="w-7 h-7 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i class="fa-solid fa-user text-slate-500 text-xs"></i>
+      </div>`;
+  }
+  history.appendChild(div);
+  history.scrollTop = history.scrollHeight;
+}
+
+function appendStreamingMessage(fullText, onDone) {
+  const history = document.getElementById('chatHistory');
+  const div = document.createElement('div');
+  div.className = 'flex items-start gap-3';
+  const model = document.getElementById('pgModel').value;
+  div.innerHTML = `
+    <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+      <i class="fa-solid fa-bolt text-white text-xs"></i>
+    </div>
+    <div class="chat-bubble-ai rounded-xl px-4 py-3 max-w-[80%] flex-1">
+      <p class="text-xs text-slate-400 mb-1.5 font-medium">${model}</p>
+      <p class="text-sm text-slate-700 leading-relaxed stream-text whitespace-pre-wrap"></p>
+      <span class="inline-block w-1 h-4 bg-blue-600 animate-pulse ml-0.5 cursor-el" style="vertical-align:text-bottom"></span>
+    </div>`;
+  history.appendChild(div);
+  history.scrollTop = history.scrollHeight;
+  const textEl = div.querySelector('.stream-text');
+  const cursor = div.querySelector('.cursor-el');
+  let i = 0;
+  const speed = 18;
+  const interval = setInterval(() => {
+    if (i < fullText.length) {
+      textEl.textContent += fullText[i++];
+      history.scrollTop = history.scrollHeight;
+    } else {
+      clearInterval(interval);
+      cursor.remove();
+      if (onDone) onDone();
+    }
+  }, speed);
+}
+
+function clearChat() {
+  const history = document.getElementById('chatHistory');
+  history.innerHTML = `
+    <div class="flex items-start gap-3">
+      <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <i class="fa-solid fa-bolt text-white text-xs"></i>
+      </div>
+      <div class="chat-bubble-ai rounded-xl px-4 py-3 max-w-[80%]">
+        <p class="text-sm text-slate-700 leading-relaxed">对话已清空。有什么可以帮助你的？</p>
+      </div>
+    </div>`;
+  document.getElementById('pgTokenCount').classList.add('hidden');
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+// ── 文档页：文档详情（弹出提示） ──────────────────────
+function showDocDetail(key) {
+  // 实际项目中跳转至 docs-site；此处仅演示
+  const labels = {
+    quickstart:'快速接入指南', auth:'API Key 管理', sdk:'SDK 开发指南',
+    'chat-completions':'POST /chat/completions', completions:'POST /completions',
+    embeddings:'POST /embeddings', 'models-list':'GET /models',
+    streaming:'流式输出', 'error-handling':'错误处理与重试', 'rate-limit':'限流规则',
+    routing:'路由策略配置', migration:'从 OpenAI 迁移指南'
+  };
+  alert(`文档页：「${labels[key] || key}」\n\n在完整版本中，此处将跳转至独立的文档站点。`);
+}
+
+// ── 初始化 ─────────────────────────────────────────────
+showPage('home');
+</script>
+</body>
+</html>

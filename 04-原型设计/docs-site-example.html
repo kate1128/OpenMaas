@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MaaS Docs 示例页</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --panel: #ffffff;
+      --ink: #162130;
+      --muted: #546176;
+      --line: #d8e0ec;
+      --brand: #0a7a6f;
+      --brand-2: #0f4fa8;
+      --code-bg: #101826;
+      --ok: #2d8a5f;
+      --warn: #ad6d0d;
+      --radius: 14px;
+      --shadow: 0 14px 32px rgba(28, 42, 60, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      background: radial-gradient(circle at 0% 0%, #e7f5f2 0%, transparent 30%),
+                  radial-gradient(circle at 100% 0%, #e9f0ff 0%, transparent 35%),
+                  var(--bg);
+      color: var(--ink);
+      font-family: "Sora", "Noto Sans SC", sans-serif;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.84);
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+
+    .brand i {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      box-shadow: 0 0 0 6px rgba(10, 122, 111, 0.18);
+    }
+
+    .search {
+      width: min(440px, 100%);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #fff;
+      color: var(--ink);
+      font-family: inherit;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 260px 1fr 250px;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar {
+      padding: 14px;
+      position: sticky;
+      top: 70px;
+      max-height: calc(100vh - 90px);
+      overflow: auto;
+    }
+
+    .nav-group {
+      margin-bottom: 14px;
+    }
+
+    .nav-title {
+      font-size: 12px;
+      letter-spacing: 0.6px;
+      color: var(--muted);
+      margin: 8px 8px;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      width: 100%;
+      text-align: left;
+      border: 0;
+      border-radius: 9px;
+      background: transparent;
+      color: var(--ink);
+      padding: 9px 10px;
+      font-family: inherit;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .nav-item:hover { background: #f2f6fc; }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, #dff5f1, #e9f0ff);
+      border: 1px solid #cadff9;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .doc-page { display: none; animation: appear 0.24s ease; }
+    .doc-page.active { display: block; }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .kicker {
+      color: var(--brand-2);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+    }
+
+    h1 { margin: 8px 0 10px; font-size: 30px; line-height: 1.2; }
+    h2 { margin: 24px 0 8px; font-size: 20px; }
+    p, li { color: #28364b; line-height: 1.7; }
+
+    .callout {
+      border-radius: 12px;
+      padding: 12px;
+      margin: 14px 0;
+      border: 1px solid #d9e9f8;
+      background: #f2f8ff;
+      color: #1d3b5f;
+      font-size: 14px;
+    }
+
+    .callout.warn {
+      background: #fff7ea;
+      border-color: #f3deb7;
+      color: #744e13;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin: 14px 0;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      border: 1px solid #c8d7ea;
+      background: #fff;
+      border-radius: 8px;
+      padding: 7px 10px;
+      cursor: pointer;
+      font-weight: 700;
+      color: #244261;
+      font-family: inherit;
+    }
+
+    .tab-btn.active {
+      background: #e8f2ff;
+      border-color: #8cb6e9;
+    }
+
+    .code-block {
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #1d2838;
+      margin: 10px 0;
+    }
+
+    .code-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #0f1722;
+      color: #b7c5db;
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .copy-btn {
+      border: 1px solid #304055;
+      background: #1a2534;
+      color: #d5e7ff;
+      border-radius: 7px;
+      padding: 4px 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
+    pre {
+      margin: 0;
+      padding: 12px;
+      background: var(--code-bg);
+      color: #dce9ff;
+      font-family: "JetBrains Mono", monospace;
+      overflow: auto;
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    code { font-family: "JetBrains Mono", monospace; }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 10px;
+      border-bottom: 1px solid #e6edf8;
+      white-space: nowrap;
+    }
+
+    th { background: #f8fbff; color: #2e4767; }
+
+    .toc {
+      padding: 14px;
+      position: sticky;
+      top: 70px;
+      max-height: calc(100vh - 90px);
+      overflow: auto;
+    }
+
+    .toc h4 {
+      margin: 4px 0 10px;
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+    }
+
+    .toc a {
+      display: block;
+      color: #2a405d;
+      text-decoration: none;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+
+    .toc a:hover { color: var(--brand-2); }
+
+    .api-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .api-card {
+      border: 1px solid #dce6f5;
+      border-radius: 12px;
+      padding: 10px;
+      background: #fcfeff;
+    }
+
+    .tag {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 11px;
+      font-weight: 700;
+      background: #dcf4ef;
+      color: #0e6c61;
+    }
+
+    .tag.post { background: #dff0ff; color: #14518e; }
+
+    .status {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--ok);
+      min-height: 16px;
+    }
+
+    @media (max-width: 1150px) {
+      .layout { grid-template-columns: 240px 1fr; }
+      .toc { display: none; }
+    }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; }
+      .sidebar { position: static; max-height: none; }
+      .api-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 25px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><i></i> MaaS Docs</div>
+    <input class="search" id="searchInput" placeholder="搜索文档，例如：chat completions" />
+  </header>
+
+  <div class="layout">
+    <aside class="panel sidebar">
+      <div class="nav-group">
+        <div class="nav-title">快速开始</div>
+        <button class="nav-item active" data-doc="quickstart">5 分钟接入</button>
+        <button class="nav-item" data-doc="auth">鉴权方式</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-title">API 参考</div>
+        <button class="nav-item" data-doc="chat-api">Chat Completions</button>
+        <button class="nav-item" data-doc="embedding">Embeddings</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-title">运维与治理</div>
+        <button class="nav-item" data-doc="errors">错误码与重试</button>
+        <button class="nav-item" data-doc="changelog">版本更新</button>
+      </div>
+    </aside>
+
+    <main class="panel content">
+      <article class="doc-page active" id="quickstart">
+        <div class="kicker">Getting Started</div>
+        <h1>5 分钟接入 MaaS 统一 API</h1>
+        <p>你可以使用 OpenAI SDK 不改业务逻辑地迁移到 MaaS 平台，仅需替换 <code>base_url</code> 与 <code>api_key</code>。</p>
+
+        <div class="callout">
+          推荐先使用测试项目和限额 Key，验证路由策略与成本后再切生产环境。
+        </div>
+
+        <h2 id="qs-step1">1. 安装 SDK</h2>
+        <div class="tabs" data-tab-group="sdk-tabs">
+          <button class="tab-btn active" data-target="sdk-python">Python</button>
+          <button class="tab-btn" data-target="sdk-node">Node.js</button>
+          <button class="tab-btn" data-target="sdk-go">Go</button>
+        </div>
+
+        <section class="tab-panel" id="sdk-python">
+          <div class="code-block">
+            <div class="code-head">
+              <span>bash</span>
+              <button class="copy-btn" data-copy="pip install openai">复制</button>
+            </div>
+            <pre>pip install openai</pre>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="sdk-node" style="display:none;">
+          <div class="code-block">
+            <div class="code-head">
+              <span>bash</span>
+              <button class="copy-btn" data-copy="npm i openai">复制</button>
+            </div>
+            <pre>npm i openai</pre>
+          </div>
+        </section>
+
+        <section class="tab-panel" id="sdk-go" style="display:none;">
+          <div class="code-block">
+            <div class="code-head">
+              <span>bash</span>
+              <button class="copy-btn" data-copy="go get github.com/openai/openai-go">复制</button>
+            </div>
+            <pre>go get github.com/openai/openai-go</pre>
+          </div>
+        </section>
+
+        <h2 id="qs-step2">2. 发送第一个请求</h2>
+        <div class="code-block">
+          <div class="code-head">
+            <span>python</span>
+            <button class="copy-btn" data-copy="from openai import OpenAI\nclient = OpenAI(api_key='maas_xxx', base_url='https://api.maas-platform.com/v1')\nresp = client.chat.completions.create(model='gpt-4o', messages=[{'role':'user','content':'你好'}])\nprint(resp.choices[0].message.content)">复制</button>
+          </div>
+          <pre>from openai import OpenAI
+
+client = OpenAI(
+  api_key="maas_xxx",
+  base_url="https://api.maas-platform.com/v1"
+)
+
+resp = client.chat.completions.create(
+  model="gpt-4o",
+  messages=[{"role": "user", "content": "你好"}],
+)
+
+print(resp.choices[0].message.content)</pre>
+        </div>
+
+        <div class="callout warn">
+          如果你启用了企业白名单 IP，记得将服务器出口地址加入控制台安全策略。
+        </div>
+      </article>
+
+      <article class="doc-page" id="auth">
+        <div class="kicker">Security</div>
+        <h1>鉴权方式</h1>
+        <p>平台支持 API Key 与企业 SSO，两种模式可并行使用。</p>
+        <div class="table-wrap">
+          <table>
+            <tr><th>方式</th><th>适用对象</th><th>优点</th><th>注意事项</th></tr>
+            <tr><td>API Key</td><td>服务到服务调用</td><td>简单直连</td><td>建议 90 天轮转</td></tr>
+            <tr><td>JWT + SSO</td><td>控制台人机登录</td><td>统一身份治理</td><td>依赖企业 IdP</td></tr>
+          </table>
+        </div>
+      </article>
+
+      <article class="doc-page" id="chat-api">
+        <div class="kicker">API Reference</div>
+        <h1>Chat Completions</h1>
+        <p><span class="tag post">POST</span> <code>/v1/chat/completions</code></p>
+
+        <div class="api-grid">
+          <div class="api-card">
+            <h3>请求头</h3>
+            <ul>
+              <li><code>Authorization: Bearer maas_xxx</code></li>
+              <li><code>Content-Type: application/json</code></li>
+            </ul>
+          </div>
+          <div class="api-card">
+            <h3>关键参数</h3>
+            <ul>
+              <li><code>model</code>: 目标模型 ID</li>
+              <li><code>messages</code>: 对话消息列表</li>
+              <li><code>stream</code>: 是否使用 SSE</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="code-block">
+          <div class="code-head">
+            <span>json</span>
+            <button class="copy-btn" data-copy='{"model":"gpt-4o","stream":true,"messages":[{"role":"user","content":"解释一下RAG"}]}' >复制</button>
+          </div>
+          <pre>{
+  "model": "gpt-4o",
+  "stream": true,
+  "messages": [
+    { "role": "user", "content": "解释一下RAG" }
+  ]
+}</pre>
+        </div>
+      </article>
+
+      <article class="doc-page" id="embedding">
+        <div class="kicker">API Reference</div>
+        <h1>Embeddings</h1>
+        <p>用于语义检索、推荐、聚类等向量化场景。</p>
+      </article>
+
+      <article class="doc-page" id="errors">
+        <div class="kicker">Reliability</div>
+        <h1>错误码与重试建议</h1>
+        <div class="table-wrap">
+          <table>
+            <tr><th>错误码</th><th>含义</th><th>建议</th></tr>
+            <tr><td>401</td><td>鉴权失败</td><td>检查 Key 状态与权限</td></tr>
+            <tr><td>429</td><td>限流触发</td><td>指数退避重试，检查配额</td></tr>
+            <tr><td>503</td><td>上游不可用</td><td>启用路由降级或备用模型</td></tr>
+          </table>
+        </div>
+      </article>
+
+      <article class="doc-page" id="changelog">
+        <div class="kicker">Release Notes</div>
+        <h1>版本更新</h1>
+        <ul>
+          <li><strong>2026-05-15</strong>：新增 docs 示例页模板，支持多语言代码切换。</li>
+          <li><strong>2026-05-10</strong>：新增账单导出 API 与分页参数。</li>
+          <li><strong>2026-05-01</strong>：发布 v1.6，优化 SSE 连接稳定性。</li>
+        </ul>
+      </article>
+    </main>
+
+    <aside class="panel toc">
+      <h4>On This Page</h4>
+      <a href="#qs-step1">1. 安装 SDK</a>
+      <a href="#qs-step2">2. 发送第一个请求</a>
+      <a href="#">3. 生产建议</a>
+      <hr style="border:0;border-top:1px solid var(--line);margin:12px 0;" />
+      <h4>资源</h4>
+      <a href="#">OpenAPI 下载</a>
+      <a href="#">SDK 源码</a>
+      <a href="#">状态页</a>
+      <div class="status" id="copyStatus"></div>
+    </aside>
+  </div>
+
+  <script>
+    const navItems = document.querySelectorAll('.nav-item');
+    const pages = document.querySelectorAll('.doc-page');
+    const searchInput = document.getElementById('searchInput');
+
+    navItems.forEach((item) => {
+      item.addEventListener('click', () => {
+        navItems.forEach((n) => n.classList.remove('active'));
+        pages.forEach((p) => p.classList.remove('active'));
+        item.classList.add('active');
+        const target = document.getElementById(item.dataset.doc);
+        if (target) target.classList.add('active');
+      });
+    });
+
+    searchInput.addEventListener('input', () => {
+      const keyword = searchInput.value.trim().toLowerCase();
+      navItems.forEach((item) => {
+        const show = !keyword || item.textContent.toLowerCase().includes(keyword);
+        item.style.display = show ? '' : 'none';
+      });
+    });
+
+    document.querySelectorAll('.tabs').forEach((group) => {
+      const buttons = group.querySelectorAll('.tab-btn');
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          buttons.forEach((b) => b.classList.remove('active'));
+          btn.classList.add('active');
+          const targetId = btn.dataset.target;
+          document.querySelectorAll('.tab-panel').forEach((panel) => {
+            panel.style.display = panel.id === targetId ? '' : 'none';
+          });
+        });
+      });
+    });
+
+    const status = document.getElementById('copyStatus');
+    document.querySelectorAll('.copy-btn').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(btn.dataset.copy || '');
+          status.textContent = '已复制代码片段';
+        } catch {
+          status.textContent = '复制失败，请手动复制';
+        }
+        setTimeout(() => { status.textContent = ''; }, 1600);
+      });
+    });
+  </script>
+</body>
+</html>
