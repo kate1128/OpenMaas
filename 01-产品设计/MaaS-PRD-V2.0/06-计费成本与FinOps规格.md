@@ -34,6 +34,18 @@ MaaS 平台的计费体系是整个商业闭环的核心支柱。区别于传统
 
 **实时性**：余额扣减采用预扣-核销两阶段机制，预扣在请求发出前完成（P99 < 5ms），核销在响应回包后 1 秒内完成。对于流式响应（SSE），核销触发点为流结束事件或超时。
 
+> **流式响应预扣估算机制**：流式响应（SSE）在请求发出时 Completion Token 数量未知，预扣必须基于估算上限。估算规则按以下优先级执行：
+> 1. 若请求携带 `max_tokens` 参数，以 `prompt_tokens_estimated + max_tokens` 为预扣上限（`prompt_tokens_estimated` = 请求 Body 中 messages 的 Tokenizer 估算值）
+> 2. 若未携带 `max_tokens`，以 `prompt_tokens_estimated + model_default_max_completion`（来自模型卡片字段 `context_window × 0.5`）为预扣上限
+> 3. 预扣金额 = 预扣 Token 估算值 × 当前模型的最高单价（取 input_price 与 output_price 中的较大值），确保保守预扣不欠扣
+>
+> **高并发降级策略**：当预扣服务 P99 延迟连续 30 秒超过 10ms 时，系统自动切换为"宽松预扣模式"：
+> - 跳过实时余额校验，仅记录预扣请求，异步完成扣减
+> - 允许短暂超扣（超出预算上限不超过 20%）
+> - 触发告警通知平台运维和租户 Billing Admin
+> - 宽松预扣模式持续超过 5 分钟后，自动限流至正常 QPS 的 50% 并恢复严格模式
+> - 所有宽松预扣期间的请求在 `billing_ledger` 中标注 `deduction_mode = 'relaxed'`，供后续对账审计
+
 **可审计性**：每一笔计费记录（billing_ledger）须包含完整的因果链，可从一笔账单行项回溯至原始 HTTP 请求日志。所有价格变更须有版本快照，历史账单不受价格修改影响。
 
 **灵活性**：支持按 Token 计费、按调用次数计费、按包月套餐计费、按合同约定阶梯价计费四种基础模型，以及组合计费（如：包月基础额度 + 超量按 Token 计费）。

@@ -28,6 +28,12 @@
     .model-drawer-mask { display: none; position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,0.4); justify-content: flex-end; }
     .model-drawer-mask.show { display: flex; }
     .model-drawer { width: 480px; max-width: 95vw; background: #fff; height: 100%; display: flex; flex-direction: column; overflow: hidden; }
+    /* Nav groups */
+    .nav-sub { overflow: hidden; transition: max-height 0.2s ease; max-height: 0; }
+    .nav-sub.open { max-height: 300px; }
+    .nav-chevron.open { transform: rotate(90deg); }
+    .nav-sub-item { border-left: 2px solid transparent; }
+    .nav-sub-item.active { background-color: #EFF6FF; color: #2563EB; border-left-color: #2563EB; font-weight: 500; }
   </style>
 </head>
 <body class="flex h-screen bg-slate-50 overflow-hidden text-slate-900">
@@ -44,89 +50,148 @@
       </div>
     </div>
 
-    <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
-      <p class="sidebar-group-label text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 pt-1 pb-1.5">基础</p>
+    <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5" id="mainNav">
+      <!-- 1. 仪表板 -->
       <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="dashboard">
         <i class="fa-solid fa-gauge-high nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">概览</span>
+        <span class="sidebar-text whitespace-nowrap">仪表板</span>
       </button>
 
-      <p class="sidebar-group-label text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 pt-3 pb-1.5">开发接入</p>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="models">
-        <i class="fa-solid fa-store nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">模型广场</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="projects">
-        <i class="fa-solid fa-folder nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">项目管理</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="apikey">
-        <i class="fa-solid fa-key nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">API Keys</span>
-      </button>
+      <!-- 2. API Key 管理 -->
+      <div>
+        <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-apikey', this)">
+          <i class="fa-solid fa-key nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+          <span class="sidebar-text whitespace-nowrap flex-1 text-left">API Key 管理</span>
+          <i class="fa-solid fa-chevron-right sidebar-text text-slate-300 text-[10px] nav-chevron transition-transform"></i>
+        </button>
+        <div id="ng-apikey" class="nav-sub pl-4 space-y-0.5">
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="apikey"><span class="sidebar-text">个人 Key</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="projects" data-subtab="proj-apikeys"><span class="sidebar-text">项目 Key</span></button>
+        </div>
+      </div>
 
-      <p class="sidebar-group-label text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 pt-3 pb-1.5">监控与账单</p>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="monitoring">
-        <i class="fa-solid fa-chart-line nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">监控告警</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="traces">
-        <i class="fa-solid fa-timeline nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">Trace 调用明细</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="billing">
-        <i class="fa-solid fa-chart-bar nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">用量与账单</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="cost-optimization">
-        <i class="fa-solid fa-coins nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">成本优化</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="approval-center">
-        <i class="fa-solid fa-circle-check nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">审批中心</span>
-        <span class="sidebar-text ml-auto bg-amber-100 text-amber-700 text-xs font-semibold px-1.5 py-0.5 rounded-full">4</span>
-      </button>
+      <!-- 3. 模型广场 -->
+      <div>
+        <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-models', this)">
+          <i class="fa-solid fa-store nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+          <span class="sidebar-text whitespace-nowrap flex-1 text-left">模型广场</span>
+          <i class="fa-solid fa-chevron-right sidebar-text text-slate-300 text-[10px] nav-chevron transition-transform"></i>
+        </button>
+        <div id="ng-models" class="nav-sub pl-4 space-y-0.5">
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="models"><span class="sidebar-text">全部模型</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="models-compare"><span class="sidebar-text">模型对比</span></button>
+        </div>
+      </div>
 
-      <p class="sidebar-group-label text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 pt-3 pb-1.5">实验与优化</p>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="playground">
-        <i class="fa-solid fa-circle-play nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">Playground</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="prompt-lab">
-        <i class="fa-solid fa-flask nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">Prompt 实验室</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="evaluation">
-        <i class="fa-solid fa-clipboard-check nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">评测中心</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="finetune">
-        <i class="fa-solid fa-microchip nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">精调中心</span>
-      </button>
+      <!-- 4. 项目管理 -->
+      <div>
+        <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-projects', this)">
+          <i class="fa-solid fa-folder nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+          <span class="sidebar-text whitespace-nowrap flex-1 text-left">项目管理</span>
+          <i class="fa-solid fa-chevron-right sidebar-text text-slate-300 text-[10px] nav-chevron transition-transform"></i>
+        </button>
+        <div id="ng-projects" class="nav-sub pl-4 space-y-0.5">
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="projects"><span class="sidebar-text">项目列表</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="proj-envmgmt"><span class="sidebar-text">环境管理</span></button>
+        </div>
+      </div>
 
-      <p class="sidebar-group-label text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 pt-3 pb-1.5">管理与治理</p>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="policy">
-        <i class="fa-solid fa-code-branch nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">策略中心</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="alerts">
-        <i class="fa-solid fa-bell nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">告警设置</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="team">
-        <i class="fa-solid fa-users nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">团队与成员</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="compliance">
-        <i class="fa-solid fa-user-shield nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">合规策略</span>
-      </button>
-      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="contract">
-        <i class="fa-solid fa-file-contract nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
-        <span class="sidebar-text whitespace-nowrap">合同管理</span>
-      </button>
+      <!-- 5. Trace 调用明细 -->
+      <div>
+        <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-traces', this)">
+          <i class="fa-solid fa-timeline nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+          <span class="sidebar-text whitespace-nowrap flex-1 text-left">Trace 调用明细</span>
+          <i class="fa-solid fa-chevron-right sidebar-text text-slate-300 text-[10px] nav-chevron transition-transform"></i>
+        </button>
+        <div id="ng-traces" class="nav-sub pl-4 space-y-0.5">
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="traces"><span class="sidebar-text">实时调用 / 历史查询</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="traces-anomaly"><span class="sidebar-text">异常聚类</span></button>
+        </div>
+      </div>
+
+      <!-- 6. 路由策略 -->
+      <div>
+        <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-policy', this)">
+          <i class="fa-solid fa-code-branch nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+          <span class="sidebar-text whitespace-nowrap flex-1 text-left">路由策略</span>
+          <i class="fa-solid fa-chevron-right sidebar-text text-slate-300 text-[10px] nav-chevron transition-transform"></i>
+        </button>
+        <div id="ng-policy" class="nav-sub pl-4 space-y-0.5">
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="policy"><span class="sidebar-text">策略列表</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="policy-simulate"><span class="sidebar-text">策略仿真</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="policy-versions"><span class="sidebar-text">版本历史</span></button>
+        </div>
+      </div>
+
+      <!-- 7. Prompt 实验室 -->
+      <div>
+        <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-prompt', this)">
+          <i class="fa-solid fa-flask nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+          <span class="sidebar-text whitespace-nowrap flex-1 text-left">Prompt 实验室</span>
+          <i class="fa-solid fa-chevron-right sidebar-text text-slate-300 text-[10px] nav-chevron transition-transform"></i>
+        </button>
+        <div id="ng-prompt" class="nav-sub pl-4 space-y-0.5">
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="prompt-lab"><span class="sidebar-text">Prompt 库</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="playground"><span class="sidebar-text">Playground</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="evaluation"><span class="sidebar-text">评测任务</span></button>
+        </div>
+      </div>
+
+      <!-- 8. 成本优化中心 -->
+      <div>
+        <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-cost', this)">
+          <i class="fa-solid fa-coins nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+          <span class="sidebar-text whitespace-nowrap flex-1 text-left">成本优化中心</span>
+          <i class="fa-solid fa-chevron-right sidebar-text text-slate-300 text-[10px] nav-chevron transition-transform"></i>
+        </button>
+        <div id="ng-cost" class="nav-sub pl-4 space-y-0.5">
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="billing"><span class="sidebar-text">成本仪表板</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="cost-optimization"><span class="sidebar-text">优化建议</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="cost-budget"><span class="sidebar-text">预算管理</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="billing"><span class="sidebar-text">账单下载</span></button>
+        </div>
+      </div>
+
+      <!-- 9. 合规策略 -->
+      <div>
+        <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-compliance', this)">
+          <i class="fa-solid fa-user-shield nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+          <span class="sidebar-text whitespace-nowrap flex-1 text-left">合规策略</span>
+          <i class="fa-solid fa-chevron-right sidebar-text text-slate-300 text-[10px] nav-chevron transition-transform"></i>
+        </button>
+        <div id="ng-compliance" class="nav-sub pl-4 space-y-0.5">
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="compliance"><span class="sidebar-text">策略列表</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="compliance-guardrails"><span class="sidebar-text">内容安全</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="compliance-reports"><span class="sidebar-text">合规报告</span></button>
+        </div>
+      </div>
+
+      <!-- 10. 团队与成员 -->
+      <div>
+        <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-team', this)">
+          <i class="fa-solid fa-users nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+          <span class="sidebar-text whitespace-nowrap flex-1 text-left">团队与成员</span>
+          <i class="fa-solid fa-chevron-right sidebar-text text-slate-300 text-[10px] nav-chevron transition-transform"></i>
+        </button>
+        <div id="ng-team" class="nav-sub pl-4 space-y-0.5">
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="team"><span class="sidebar-text">成员列表</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="team-sso"><span class="sidebar-text">SSO 配置</span></button>
+        </div>
+      </div>
+
+      <!-- 11. 告警与合同 -->
+      <div>
+        <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-alerts', this)">
+          <i class="fa-solid fa-bell nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+          <span class="sidebar-text whitespace-nowrap flex-1 text-left">告警与合同</span>
+          <i class="fa-solid fa-chevron-right sidebar-text text-slate-300 text-[10px] nav-chevron transition-transform"></i>
+        </button>
+        <div id="ng-alerts" class="nav-sub pl-4 space-y-0.5">
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="alerts"><span class="sidebar-text">告警规则</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="alert-channels"><span class="sidebar-text">通知渠道</span></button>
+          <button class="nav-sub-item w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="contract"><span class="sidebar-text">合同查看</span></button>
+        </div>
+      </div>
     </nav>
 
     <div class="border-t border-slate-200 px-4 py-3 flex items-center gap-3 flex-shrink-0">
@@ -434,7 +499,7 @@
                 <th class="px-5 py-3"></th>
               </tr></thead>
               <tbody id="personalKeyTableBody" class="divide-y divide-slate-100">
-                <!-- Alice 自己的 Key（始终显示） -->
+                 <!-- Alice 自己的 Key（始终显示） -->
                 <tr class="hover:bg-slate-50" data-owner="alice">
                   <td id="tdPersonalKeyOwner1" class="px-5 py-3 text-xs text-slate-600"><span class="inline-flex items-center gap-1.5"><span class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold">A</span>Alice <span class="text-slate-400 font-normal">（我）</span></span></td>
                   <td class="px-5 py-3 font-medium text-slate-800">alice-personal-key</td>
@@ -442,23 +507,45 @@
                   <td class="px-5 py-3 text-xs text-slate-600">¥12.40 · 48万 Token</td>
                   <td class="px-5 py-3 text-xs text-slate-400">5 分钟前</td>
                   <td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">启用</span></td>
-                  <td class="px-5 py-3 text-right flex gap-3 justify-end">
+                  <td class="px-5 py-3 text-right flex gap-2 justify-end">
                     <button class="text-xs text-blue-600 hover:text-blue-700" onclick="showToast('已复制 Key 到剪贴板')"><i class="fa-solid fa-copy mr-1"></i>复制</button>
-                    <button class="text-xs text-slate-500 hover:text-slate-700" onclick="showToast('轮换 Key 演示')"><i class="fa-solid fa-rotate mr-1"></i>轮换</button>
-                    <button class="text-xs text-red-500 hover:text-red-700" onclick="showToast('已停用')">停用</button>
+                    <button class="text-xs text-slate-500 hover:text-slate-700" onclick="openRotateModal('alice-personal-key','sk-pers-****-8a2f')"><i class="fa-solid fa-rotate mr-1"></i>轮转</button>
+                    <button class="text-xs text-red-500 hover:text-red-700 font-medium" onclick="openRevokeModal('alice-personal-key','sk-pers-')"><i class="fa-solid fa-ban mr-1"></i>紧急撤销</button>
                   </td>
                 </tr>
-                <tr class="hover:bg-slate-50" data-owner="alice">
+                <!-- PRD §3.5：轮转中状态演示行（双Key并存期 · 旧Key行） -->
+                <tr class="hover:bg-amber-50/50 bg-amber-50/20" data-owner="alice">
                   <td id="tdPersonalKeyOwner2" class="px-5 py-3 text-xs text-slate-600"><span class="inline-flex items-center gap-1.5"><span class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold">A</span>Alice <span class="text-slate-400 font-normal">（我）</span></span></td>
-                  <td class="px-5 py-3 font-medium text-slate-800">alice-dev-debug</td>
+                  <td class="px-5 py-3">
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium text-slate-800">alice-dev-debug</span>
+                      <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-700 border border-amber-200"><i class="fa-solid fa-rotate text-[9px]"></i>轮转中</span>
+                      <span class="text-[10px] text-amber-600">还有 <span id="rotateCountdown">23h 12m</span> 失效</span>
+                    </div>
+                  </td>
                   <td class="px-5 py-3 font-mono text-xs text-slate-500">sk-pers-****-3c19</td>
                   <td class="px-5 py-3 text-xs text-slate-600">¥3.20 · 12万 Token</td>
                   <td class="px-5 py-3 text-xs text-slate-400">2026-05-18</td>
-                  <td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">启用</span></td>
-                  <td class="px-5 py-3 text-right flex gap-3 justify-end">
-                    <button class="text-xs text-blue-600 hover:text-blue-700" onclick="showToast('已复制 Key 到剪贴板')"><i class="fa-solid fa-copy mr-1"></i>复制</button>
-                    <button class="text-xs text-slate-500 hover:text-slate-700" onclick="showToast('轮换 Key 演示')"><i class="fa-solid fa-rotate mr-1"></i>轮换</button>
-                    <button class="text-xs text-red-500 hover:text-red-700" onclick="showToast('已停用')">停用</button>
+                  <td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">旧 Key（并存期）</span></td>
+                  <td class="px-5 py-3 text-right flex gap-2 justify-end">
+                    <button class="text-xs text-amber-600 hover:text-amber-700 font-medium" onclick="showConfirm('提前终止轮转并停用旧 Key','确认后旧 Key 立即失效，新 Key 成为唯一有效 Key。此操作不可撤销。',()=>showToast('旧 Key 已立即停用，轮转完成'), '立即停用旧 Key', 'bg-amber-600 hover:bg-amber-700')"><i class="fa-solid fa-check mr-1"></i>立即完成轮转</button>
+                  </td>
+                </tr>
+                <!-- 对应新Key行（并存期 · 新Key） -->
+                <tr class="hover:bg-green-50/50 bg-green-50/10" data-owner="alice">
+                  <td class="px-5 py-3 text-xs text-slate-600"><span class="inline-flex items-center gap-1.5"><span class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center font-bold">A</span>Alice <span class="text-slate-400 font-normal">（我）</span></span></td>
+                  <td class="px-5 py-3">
+                    <div class="flex items-center gap-2">
+                      <span class="font-medium text-slate-800">alice-dev-debug</span>
+                      <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-green-100 text-green-700 border border-green-200"><i class="fa-solid fa-sparkles text-[9px]"></i>新 Key</span>
+                    </div>
+                  </td>
+                  <td class="px-5 py-3 font-mono text-xs text-slate-500">sk-pers-****-e840</td>
+                  <td class="px-5 py-3 text-xs text-slate-400">—</td>
+                  <td class="px-5 py-3 text-xs text-slate-400">刚创建</td>
+                  <td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">启用（新）</span></td>
+                  <td class="px-5 py-3 text-right flex gap-2 justify-end">
+                    <button class="text-xs text-blue-600 hover:text-blue-700" onclick="showToast('已复制新 Key 到剪贴板')"><i class="fa-solid fa-copy mr-1"></i>复制</button>
                   </td>
                 </tr>
                 <!-- 其他成员的 Key（仅管理员视图可见） -->
@@ -1454,27 +1541,29 @@
 
       <!-- 告警设置 -->
       <div id="alerts" class="section">
+        <div class="flex items-center justify-between mb-5">
+          <div><h1 class="text-xl font-semibold text-slate-900">告警规则</h1><p class="text-sm text-slate-500 mt-1">费用、延迟、错误率、供应商健康度统一告警，每条规则最多绑定 5 个通知渠道</p></div>
+          <button id="openAlertModal" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" onclick="openModal('modal-alert-rule')"><i class="fa-solid fa-plus mr-1.5"></i>新建规则</button>
+        </div>
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-          <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-            <div>
-              <h2 class="text-base font-semibold text-slate-800">告警规则</h2>
-              <p class="text-xs text-slate-400 mt-0.5">费用、延迟、错误率、供应商健康度统一告警</p>
-            </div>
-            <button id="openAlertModal" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"><i class="fa-solid fa-plus mr-1.5"></i>新建规则</button>
-          </div>
           <table class="w-full text-sm">
             <thead>
               <tr class="bg-slate-50 border-b border-slate-200">
                 <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">规则名称</th>
-                <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">阈值</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">监控指标</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">触发条件</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">时间窗口</th>
+                <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">严重级别</th>
                 <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">通知渠道</th>
                 <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">状态</th>
+                <th class="px-5 py-3"></th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              <tr class="hover:bg-slate-50"><td class="px-5 py-3 text-sm font-medium text-slate-800">P95 延迟</td><td class="px-5 py-3 text-sm text-slate-600">&gt; 2.0s 持续 5 分钟</td><td class="px-5 py-3 text-sm text-slate-600">飞书 + 邮件</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">启用</span></td></tr>
-              <tr class="hover:bg-slate-50"><td class="px-5 py-3 text-sm font-medium text-slate-800">错误率</td><td class="px-5 py-3 text-sm text-slate-600">&gt; 1.5%</td><td class="px-5 py-3 text-sm text-slate-600">PagerDuty</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">启用</span></td></tr>
-              <tr class="hover:bg-slate-50"><td class="px-5 py-3 text-sm font-medium text-slate-800">预算消耗</td><td class="px-5 py-3 text-sm text-slate-600">&gt; 80%</td><td class="px-5 py-3 text-sm text-slate-600">邮件</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">待确认</span></td></tr>
+              <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-medium text-slate-800">P95 延迟告警</td><td class="px-5 py-3 text-xs text-slate-600 font-mono">p95_latency_ms</td><td class="px-5 py-3 text-sm text-slate-600">&gt; 2,000ms</td><td class="px-5 py-3 text-xs text-slate-500">5 分钟</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-amber-50 text-amber-700">warning</span></td><td class="px-5 py-3 text-xs text-slate-500">飞书研发群, 运维邮件组</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">启用</span></td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="openModal('modal-alert-rule')">编辑</button><button class="text-xs text-slate-400 hover:text-slate-600" onclick="showToast('已暂停规则')">暂停</button></td></tr>
+              <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-medium text-slate-800">错误率严重告警</td><td class="px-5 py-3 text-xs text-slate-600 font-mono">request_error_rate</td><td class="px-5 py-3 text-sm text-slate-600">&gt; 1.5%</td><td class="px-5 py-3 text-xs text-slate-500">5 分钟</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-red-50 text-red-700">critical</span></td><td class="px-5 py-3 text-xs text-slate-500">PagerDuty, 飞书研发群</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">启用</span></td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="openModal('modal-alert-rule')">编辑</button><button class="text-xs text-slate-400 hover:text-slate-600" onclick="showToast('已暂停规则')">暂停</button></td></tr>
+              <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-medium text-slate-800">预算使用率告警</td><td class="px-5 py-3 text-xs text-slate-600 font-mono">budget_usage_rate</td><td class="px-5 py-3 text-sm text-slate-600">&gt; 80%</td><td class="px-5 py-3 text-xs text-slate-500">1 天</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">info</span></td><td class="px-5 py-3 text-xs text-slate-500">运维邮件组</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">待确认</span></td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="openModal('modal-alert-rule')">编辑</button><button class="text-xs text-slate-400 hover:text-slate-600" onclick="showToast('已暂停规则')">暂停</button></td></tr>
+              <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-medium text-slate-800">Fallback 率告警</td><td class="px-5 py-3 text-xs text-slate-600 font-mono">fallback_rate</td><td class="px-5 py-3 text-sm text-slate-600">&gt; 5%</td><td class="px-5 py-3 text-xs text-slate-500">15 分钟</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-amber-50 text-amber-700">warning</span></td><td class="px-5 py-3 text-xs text-slate-500">飞书研发群</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">启用</span></td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="openModal('modal-alert-rule')">编辑</button><button class="text-xs text-slate-400 hover:text-slate-600" onclick="showToast('已暂停规则')">暂停</button></td></tr>
             </tbody>
           </table>
         </div>
@@ -1839,6 +1928,55 @@
             <p class="text-xs text-slate-400 mt-1">冻结预扣 <span class="text-amber-600 font-medium">¥1,240</span></p>
           </div>
         </div>
+
+        <!-- 成本异常可视化面板（PRD §9 成本优化中心 / 监控告警扩展 #10） -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-5">
+          <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+            <h2 class="text-base font-semibold text-slate-800">成本异常检测</h2>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400">自动每日 02:00 分析，检测 5 类异常模式</span>
+              <select class="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white">过去 7 天</select>
+            </div>
+          </div>
+          <div class="grid grid-cols-5 divide-x divide-slate-100">
+            <!-- 类型1：突增 -->
+            <div class="p-4 hover:bg-slate-50 cursor-pointer" onclick="showToast('查看突增异常详情')">
+              <div class="flex items-center gap-1.5 mb-2"><i class="fa-solid fa-arrow-trend-up text-red-500 text-sm"></i><span class="text-xs font-semibold text-slate-700">成本突增</span></div>
+              <p class="text-2xl font-bold text-red-600">2</p>
+              <p class="text-xs text-slate-400 mt-1">环比增幅 &gt; 50%</p>
+              <div class="mt-2 space-y-1 text-xs"><div class="flex justify-between"><span class="text-slate-500">gpt-4o</span><span class="text-red-500">+187%</span></div><div class="flex justify-between"><span class="text-slate-500">core-api</span><span class="text-red-500">+62%</span></div></div>
+            </div>
+            <!-- 类型2：长尾请求 -->
+            <div class="p-4 hover:bg-slate-50 cursor-pointer" onclick="showToast('查看长尾高成本请求')">
+              <div class="flex items-center gap-1.5 mb-2"><i class="fa-solid fa-chart-area text-amber-500 text-sm"></i><span class="text-xs font-semibold text-slate-700">长尾高成本</span></div>
+              <p class="text-2xl font-bold text-amber-600">18</p>
+              <p class="text-xs text-slate-400 mt-1">单次 &gt; ¥1.00</p>
+              <div class="mt-2 text-xs text-slate-500">占总成本 14.2%，建议优化 Prompt 长度</div>
+            </div>
+            <!-- 类型3：重复请求 -->
+            <div class="p-4 hover:bg-slate-50 cursor-pointer" onclick="showToast('查看高重复率请求群')">
+              <div class="flex items-center gap-1.5 mb-2"><i class="fa-solid fa-copy text-blue-500 text-sm"></i><span class="text-xs font-semibold text-slate-700">高重复率</span></div>
+              <p class="text-2xl font-bold text-blue-600">31.6%</p>
+              <p class="text-xs text-slate-400 mt-1">语义相似度 &gt; 0.92</p>
+              <div class="mt-2 text-xs text-green-600 font-medium">建议启用语义缓存（预计省 ¥3,400/月）</div>
+            </div>
+            <!-- 类型4：闲置项目 -->
+            <div class="p-4 hover:bg-slate-50 cursor-pointer" onclick="showToast('查看低利用率项目')">
+              <div class="flex items-center gap-1.5 mb-2"><i class="fa-solid fa-moon text-slate-400 text-sm"></i><span class="text-xs font-semibold text-slate-700">闲置项目</span></div>
+              <p class="text-2xl font-bold text-slate-500">3</p>
+              <p class="text-xs text-slate-400 mt-1">30天调用量 = 0</p>
+              <div class="mt-2 text-xs text-slate-500">建议归档以节省配额管理成本</div>
+            </div>
+            <!-- 类型5：预算风险 -->
+            <div class="p-4 hover:bg-slate-50 cursor-pointer" onclick="navigate('cost-budget')">
+              <div class="flex items-center gap-1.5 mb-2"><i class="fa-solid fa-gauge-high text-red-500 text-sm"></i><span class="text-xs font-semibold text-slate-700">预算风险</span></div>
+              <p class="text-2xl font-bold text-red-600">1</p>
+              <p class="text-xs text-slate-400 mt-1">预计 6 天内超支</p>
+              <div class="mt-2 text-xs text-red-500 font-medium">dev-lab 项目，点击查看预算详情</div>
+            </div>
+          </div>
+        </div>
+
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
             <h2 class="text-base font-semibold text-slate-800">告警事件</h2>
@@ -2627,93 +2765,231 @@
               <h2 class="text-sm font-semibold text-slate-800">调用列表</h2>
               <div class="flex gap-2"><input placeholder="搜索 request_id / 模型 / API Key" class="w-64 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" /><button class="bg-white border border-slate-200 px-3 py-2 rounded-lg text-sm">筛选</button></div>
             </div>
-            <table class="w-full text-sm">
-              <thead><tr class="bg-slate-50 border-b border-slate-200"><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">Request ID</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">模型</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">路由</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">成本</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">状态</th></tr></thead>
+            <!-- PRD 6.1：列表字段定义 — request_id / created_at / model_name / strategy_name / status / cost / latency_ms / ttft_ms / is_cached / is_fallback / input_tokens / output_tokens -->
+            <div class="overflow-x-auto">
+            <table class="w-full text-sm whitespace-nowrap">
+              <thead><tr class="bg-slate-50 border-b border-slate-200">
+                <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Request ID</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">时间</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">模型</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">路由策略</th>
+                <th class="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase">状态</th>
+                <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">成本</th>
+                <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">延迟</th>
+                <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">首Token</th>
+                <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Input</th>
+                <th class="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase">Output</th>
+              </tr></thead>
               <tbody class="divide-y divide-slate-100">
-                <tr class="hover:bg-slate-50 cursor-pointer"><td class="px-5 py-3 font-medium text-blue-600">req_8f2a91</td><td class="px-5 py-3">qwen-max</td><td class="px-5 py-3 text-slate-500">balanced-v3</td><td class="px-5 py-3">¥0.034</td><td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700"><i class="fa-solid fa-circle-check text-xs"></i>成功</span></td></tr>
-                <tr class="hover:bg-slate-50 cursor-pointer"><td class="px-5 py-3 font-medium text-blue-600">req_72bc10</td><td class="px-5 py-3">deepseek-v3</td><td class="px-5 py-3 text-slate-500">cost-save-v2</td><td class="px-5 py-3">¥0.012</td><td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700"><i class="fa-solid fa-triangle-exclamation text-xs"></i>Fallback</span></td></tr>
-                <tr class="hover:bg-slate-50 cursor-pointer"><td class="px-5 py-3 font-medium text-blue-600">req_19ad44</td><td class="px-5 py-3">gpt-4o</td><td class="px-5 py-3 text-slate-500">quality-first</td><td class="px-5 py-3">¥0.186</td><td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700"><i class="fa-solid fa-circle-check text-xs"></i>成功</span></td></tr>
-                <tr class="hover:bg-slate-50 cursor-pointer"><td class="px-5 py-3 font-medium text-blue-600">req_5520af</td><td class="px-5 py-3">kimi-k2</td><td class="px-5 py-3 text-slate-500">compliance-cn</td><td class="px-5 py-3">¥0.029</td><td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700"><i class="fa-solid fa-circle-xmark text-xs"></i>拦截</span></td></tr>
-                <tr class="hover:bg-slate-50 cursor-pointer"><td class="px-5 py-3 font-medium text-blue-600">req_9002cd</td><td class="px-5 py-3">qwen-plus</td><td class="px-5 py-3 text-slate-500">cache-first</td><td class="px-5 py-3">¥0.000</td><td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700"><i class="fa-solid fa-database text-xs"></i>缓存命中</span></td></tr>
+                <tr class="hover:bg-slate-50 cursor-pointer">
+                  <td class="px-4 py-3 font-medium text-blue-600">req_8f2a91</td>
+                  <td class="px-4 py-3 text-slate-500 text-xs">05-22 14:32:08.421</td>
+                  <td class="px-4 py-3">qwen-max</td>
+                  <td class="px-4 py-3 text-slate-500">balanced-v3</td>
+                  <td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700"><i class="fa-solid fa-circle-check text-xs"></i>成功</span></td>
+                  <td class="px-4 py-3 text-right">¥0.0342</td>
+                  <td class="px-4 py-3 text-right text-slate-600">842ms</td>
+                  <td class="px-4 py-3 text-right text-slate-600">420ms</td>
+                  <td class="px-4 py-3 text-right text-slate-500">2,000</td>
+                  <td class="px-4 py-3 text-right text-slate-500">800</td>
+                </tr>
+                <tr class="hover:bg-slate-50 cursor-pointer">
+                  <td class="px-4 py-3 font-medium text-blue-600">req_72bc10</td>
+                  <td class="px-4 py-3 text-slate-500 text-xs">05-22 14:31:55.102</td>
+                  <td class="px-4 py-3">deepseek-v3</td>
+                  <td class="px-4 py-3 text-slate-500">cost-save-v2</td>
+                  <td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700"><i class="fa-solid fa-triangle-exclamation text-xs"></i>Fallback</span></td>
+                  <td class="px-4 py-3 text-right">¥0.0124</td>
+                  <td class="px-4 py-3 text-right text-slate-600">2,108ms</td>
+                  <td class="px-4 py-3 text-right text-slate-600">540ms</td>
+                  <td class="px-4 py-3 text-right text-slate-500">1,200</td>
+                  <td class="px-4 py-3 text-right text-slate-500">430</td>
+                </tr>
+                <tr class="hover:bg-slate-50 cursor-pointer">
+                  <td class="px-4 py-3 font-medium text-blue-600">req_19ad44</td>
+                  <td class="px-4 py-3 text-slate-500 text-xs">05-22 14:31:42.887</td>
+                  <td class="px-4 py-3">gpt-4o</td>
+                  <td class="px-4 py-3 text-slate-500">quality-first</td>
+                  <td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700"><i class="fa-solid fa-circle-check text-xs"></i>成功</span></td>
+                  <td class="px-4 py-3 text-right">¥0.1860</td>
+                  <td class="px-4 py-3 text-right text-slate-600">1,340ms</td>
+                  <td class="px-4 py-3 text-right text-slate-600">380ms</td>
+                  <td class="px-4 py-3 text-right text-slate-500">3,500</td>
+                  <td class="px-4 py-3 text-right text-slate-500">2,100</td>
+                </tr>
+                <tr class="hover:bg-slate-50 cursor-pointer">
+                  <td class="px-4 py-3 font-medium text-blue-600">req_5520af</td>
+                  <td class="px-4 py-3 text-slate-500 text-xs">05-22 14:31:29.334</td>
+                  <td class="px-4 py-3">kimi-k2</td>
+                  <td class="px-4 py-3 text-slate-500">compliance-cn</td>
+                  <td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700"><i class="fa-solid fa-circle-xmark text-xs"></i>拦截</span></td>
+                  <td class="px-4 py-3 text-right text-slate-400">—</td>
+                  <td class="px-4 py-3 text-right text-slate-600">62ms</td>
+                  <td class="px-4 py-3 text-right text-slate-400">—</td>
+                  <td class="px-4 py-3 text-right text-slate-500">280</td>
+                  <td class="px-4 py-3 text-right text-slate-400">0</td>
+                </tr>
+                <tr class="hover:bg-slate-50 cursor-pointer">
+                  <td class="px-4 py-3 font-medium text-blue-600">req_9002cd</td>
+                  <td class="px-4 py-3 text-slate-500 text-xs">05-22 14:31:18.560</td>
+                  <td class="px-4 py-3">qwen-plus</td>
+                  <td class="px-4 py-3 text-slate-500">cache-first</td>
+                  <td class="px-4 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700"><i class="fa-solid fa-database text-xs"></i>缓存命中</span></td>
+                  <td class="px-4 py-3 text-right">¥0.0000</td>
+                  <td class="px-4 py-3 text-right text-slate-600">18ms</td>
+                  <td class="px-4 py-3 text-right text-slate-400">—</td>
+                  <td class="px-4 py-3 text-right text-slate-500">640</td>
+                  <td class="px-4 py-3 text-right text-slate-500">320</td>
+                </tr>
               </tbody>
             </table>
+            </div>
           </div>
 
+          <!-- Trace 详情面板 — PRD 09 §6.3 五块结构：路由解释→时间线→Token与成本→Fallback链→审计信息 -->
           <div class="col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-            <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-slate-800">Trace详情：req_8f2a91</h2>
-              <button class="text-xs text-slate-400 hover:text-slate-600" onclick="showToast('已复制 request_id')"><i class="fa-solid fa-copy mr-1"></i>复制ID</button>
-            </div>
-            <div class="p-5 space-y-3">
-              <!-- 时间线 -->
-              <details open class="border border-slate-200 rounded-lg">
-                <summary class="flex items-center justify-between px-3 py-2.5 cursor-pointer list-none">
-                  <span class="text-xs font-semibold text-slate-700"><i class="fa-solid fa-timeline mr-1.5 text-slate-400"></i>链路时间线</span>
-                  <span class="text-xs text-slate-400">总耗时 842ms</span>
-                </summary>
-                <div class="px-3 pb-3 space-y-1.5 text-xs text-slate-600 border-t border-slate-100 pt-2">
-                  <div class="flex items-center gap-2"><span class="w-12 text-right text-slate-400 flex-shrink-0">0ms</span><span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>鉴权通过（tenant_id 验证）</div>
-                  <div class="flex items-center gap-2"><span class="w-12 text-right text-slate-400 flex-shrink-0">4ms</span><span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>合规策略评估通过（cn-only 满足）</div>
-                  <div class="flex items-center gap-2"><span class="w-12 text-right text-slate-400 flex-shrink-0">12ms</span><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>命中路由策略 project-balanced-v3</div>
-                  <div class="flex items-center gap-2"><span class="w-12 text-right text-slate-400 flex-shrink-0">15ms</span><span class="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0"></span>选中后端 vb_qwen_cn1（health=0.96）</div>
-                  <div class="flex items-center gap-2"><span class="w-12 text-right text-slate-400 flex-shrink-0">420ms</span><span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>首Token返回（TTFB 405ms）</div>
-                  <div class="flex items-center gap-2"><span class="w-12 text-right text-slate-400 flex-shrink-0">836ms</span><span class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></span>流式响应完成</div>
-                  <div class="flex items-center gap-2"><span class="w-12 text-right text-slate-400 flex-shrink-0">842ms</span><span class="w-2 h-2 rounded-full bg-slate-400 flex-shrink-0"></span>计费记账完成</div>
+            <!-- 基础信息区（PRD §6.3 Header，不可折叠） -->
+            <div class="px-5 py-4 border-b border-slate-200">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-semibold text-slate-800 font-mono">req_8f2a91</span>
+                  <button class="text-xs text-slate-400 hover:text-slate-600" onclick="showToast('已复制 request_id')"><i class="fa-solid fa-copy"></i></button>
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700"><i class="fa-solid fa-circle-check text-xs"></i>success</span>
                 </div>
-              </details>
-              <!-- 路由解释 -->
+                <span class="text-xs text-slate-400">2026-05-22 14:32:08.421</span>
+              </div>
+              <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                <span><i class="fa-solid fa-cube mr-1 text-slate-300"></i>qwen-max</span>
+                <span><i class="fa-solid fa-key mr-1 text-slate-300"></i><span class="text-blue-600 hover:underline cursor-pointer">prod-key-001</span></span>
+                <span><i class="fa-solid fa-folder mr-1 text-slate-300"></i><span class="text-blue-600 hover:underline cursor-pointer">core-api</span></span>
+                <span><i class="fa-solid fa-user mr-1 text-slate-300"></i>user-8812</span>
+              </div>
+            </div>
+            <div class="p-4 space-y-2.5 overflow-y-auto" style="max-height:520px">
+
+              <!-- 内容块1：路由解释区（PRD §6.3 Block 1，默认展开） -->
               <details open class="border border-slate-200 rounded-lg">
                 <summary class="flex items-center gap-1.5 px-3 py-2.5 cursor-pointer list-none">
-                  <span class="text-xs font-semibold text-slate-700"><i class="fa-solid fa-code-branch mr-1.5 text-slate-400"></i>路由解释（route_explanation）</span>
+                  <span class="text-xs font-semibold text-slate-700"><i class="fa-solid fa-code-branch mr-1.5 text-slate-400"></i>内容块1：路由解释</span>
                 </summary>
                 <div class="border-t border-slate-100">
-                  <pre class="px-3 py-2 text-[11px] text-slate-600 bg-slate-50 overflow-auto rounded-b-lg leading-relaxed"><code>{
-  "strategy_id": "proj-balanced-v3",
-  "algorithm": "weighted_latency_cost",
-  "selected_model": "qwen-max",
-  "selected_backend": "vb_qwen_cn1",
-  "candidates": [
-    { "model": "qwen-max",     "score": 0.87, "selected": true,
-      "factors": { "quality":0.88, "latency":0.92, "cost":0.95, "health":0.96 }},
-    { "model": "gpt-4o",       "score": 0.71, "selected": false,
-      "reason": "budget_limit: project monthly cap exceeded" },
-    { "model": "deepseek-v3",  "score": 0.82, "selected": false,
-      "reason": "compliance: must_have_tags [cn-only] not satisfied" }
-  ]
-}</code></pre>
-                </div>
-              </details>
-              <!-- Token & 成本 -->
-              <details class="border border-slate-200 rounded-lg">
-                <summary class="flex items-center gap-1.5 px-3 py-2.5 cursor-pointer list-none">
-                  <span class="text-xs font-semibold text-slate-700"><i class="fa-solid fa-bolt mr-1.5 text-slate-400"></i>Token & 成本</span>
-                </summary>
-                <div class="border-t border-slate-100 px-3 py-3">
-                  <div class="grid grid-cols-3 gap-3 text-center">
-                    <div class="bg-slate-50 rounded-lg p-2"><p class="text-xs text-slate-500">输入</p><p class="text-sm font-semibold">2,000</p><p class="text-xs text-slate-400">¥0.016</p></div>
-                    <div class="bg-slate-50 rounded-lg p-2"><p class="text-xs text-slate-500">输出</p><p class="text-sm font-semibold">800</p><p class="text-xs text-slate-400">¥0.019</p></div>
-                    <div class="bg-blue-50 rounded-lg p-2"><p class="text-xs text-blue-600">合计</p><p class="text-sm font-semibold text-blue-700">¥0.034</p><p class="text-xs text-slate-400">成本价</p></div>
+                  <!-- 候选模型评分表（PRD §6.3 Block 1） -->
+                  <div class="px-3 pt-2 pb-1">
+                    <table class="w-full text-xs">
+                      <thead><tr class="text-slate-400 border-b border-slate-100"><th class="text-left pb-1">模型</th><th class="text-right pb-1">健康</th><th class="text-right pb-1">成本</th><th class="text-right pb-1">性能</th><th class="text-right pb-1">综合</th><th class="text-right pb-1">结果</th></tr></thead>
+                      <tbody class="divide-y divide-slate-50">
+                        <tr class="bg-green-50/40"><td class="py-1 font-medium text-green-700">qwen-max</td><td class="py-1 text-right">96</td><td class="py-1 text-right">95</td><td class="py-1 text-right">92</td><td class="py-1 text-right font-semibold text-green-700">87</td><td class="py-1 text-right"><span class="text-green-600 font-medium">✓ 选中</span></td></tr>
+                        <tr><td class="py-1 text-slate-500">deepseek-v3</td><td class="py-1 text-right">94</td><td class="py-1 text-right">98</td><td class="py-1 text-right">88</td><td class="py-1 text-right">82</td><td class="py-1 text-right text-slate-400 text-[10px]">不满足 cn-only</td></tr>
+                        <tr><td class="py-1 text-slate-500">gpt-4o</td><td class="py-1 text-right">99</td><td class="py-1 text-right">55</td><td class="py-1 text-right">98</td><td class="py-1 text-right">71</td><td class="py-1 text-right text-slate-400 text-[10px]">超出预算上限</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="px-3 pb-2.5 pt-1">
+                    <p class="text-[10px] text-slate-400"><span class="font-medium text-slate-500">策略：</span>proj-balanced-v3 · weighted_latency_cost · v7</p>
                   </div>
                 </div>
               </details>
-              <!-- Fallback链（此请求未触发，折叠展示） -->
-              <details class="border border-slate-200 rounded-lg">
-                <summary class="flex items-center gap-1.5 px-3 py-2.5 cursor-pointer list-none">
-                  <span class="text-xs font-semibold text-slate-700"><i class="fa-solid fa-diagram-project mr-1.5 text-slate-400"></i>Fallback 链（本次未触发）</span>
-                  <span class="ml-auto inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-green-50 text-green-600">正常完成</span>
+
+              <!-- 内容块2：时间线区（PRD §6.3 Block 2，默认展开） -->
+              <details open class="border border-slate-200 rounded-lg">
+                <summary class="flex items-center justify-between px-3 py-2.5 cursor-pointer list-none">
+                  <span class="text-xs font-semibold text-slate-700"><i class="fa-solid fa-timeline mr-1.5 text-slate-400"></i>内容块2：链路时间线</span>
+                  <span class="text-xs text-slate-400">总耗时 842ms</span>
                 </summary>
-                <div class="border-t border-slate-100 px-3 py-3">
+                <!-- 瀑布图形式（PRD §6.3 Block 2） -->
+                <div class="px-3 pb-3 border-t border-slate-100 pt-2 space-y-1.5">
                   <div class="flex items-center gap-2 text-xs">
-                    <div class="px-2 py-1 rounded border border-blue-200 bg-blue-50 text-blue-700 font-medium">qwen-max<br/><span class="font-normal text-blue-500">主路由</span></div>
-                    <i class="fa-solid fa-arrow-right text-slate-300"></i>
-                    <div class="px-2 py-1 rounded border border-slate-200 bg-slate-50 text-slate-500">deepseek-v3<br/><span class="text-slate-400">备用1</span></div>
-                    <i class="fa-solid fa-arrow-right text-slate-300"></i>
-                    <div class="px-2 py-1 rounded border border-slate-200 bg-slate-50 text-slate-500">qwen-plus<br/><span class="text-slate-400">备用2</span></div>
-                    <i class="fa-solid fa-arrow-right text-slate-300"></i>
-                    <div class="px-2 py-1 rounded border border-red-100 bg-red-50 text-red-400">熔断返回<br/><span class="text-red-300">最终兜底</span></div>
+                    <span class="w-36 text-slate-500 flex-shrink-0">auth_validation</span>
+                    <div class="flex-1 bg-slate-100 rounded h-3 relative"><div class="absolute left-0 top-0 h-3 bg-green-400 rounded" style="width:0.5%"></div></div>
+                    <span class="w-12 text-right text-slate-500 flex-shrink-0">4ms</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-36 text-slate-500 flex-shrink-0">compliance_check</span>
+                    <div class="flex-1 bg-slate-100 rounded h-3 relative"><div class="absolute left-0.5 top-0 h-3 bg-amber-400 rounded" style="width:0.9%"></div></div>
+                    <span class="w-12 text-right text-slate-500 flex-shrink-0">8ms</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-36 text-slate-500 flex-shrink-0">routing_decision</span>
+                    <div class="flex-1 bg-slate-100 rounded h-3 relative"><div class="absolute left-[1.4%] top-0 h-3 bg-blue-400 rounded" style="width:3%"></div></div>
+                    <span class="w-12 text-right text-slate-500 flex-shrink-0">15ms</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-36 text-slate-500 flex-shrink-0">upstream_connect</span>
+                    <div class="flex-1 bg-slate-100 rounded h-3 relative"><div class="absolute left-[3%] top-0 h-3 bg-slate-400 rounded" style="width:2%"></div></div>
+                    <span class="w-12 text-right text-slate-500 flex-shrink-0">18ms</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-36 text-slate-500 flex-shrink-0">upstream_ttft</span>
+                    <div class="flex-1 bg-slate-100 rounded h-3 relative"><div class="absolute left-[5%] top-0 h-3 bg-indigo-400 rounded" style="width:48%"></div></div>
+                    <span class="w-12 text-right text-slate-500 flex-shrink-0">405ms</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs">
+                    <span class="w-36 text-slate-500 flex-shrink-0">upstream_total</span>
+                    <div class="flex-1 bg-slate-100 rounded h-3 relative"><div class="absolute left-[5%] top-0 h-3 bg-indigo-200 rounded" style="width:98%"></div></div>
+                    <span class="w-12 text-right text-slate-500 flex-shrink-0">821ms</span>
+                  </div>
+                  <div class="flex items-center gap-2 text-xs text-slate-400">
+                    <span class="w-36 flex-shrink-0">response_to_client</span>
+                    <div class="flex-1 bg-slate-100 rounded h-3 relative"><div class="absolute right-0 top-0 h-3 bg-slate-300 rounded" style="width:0.7%"></div></div>
+                    <span class="w-12 text-right flex-shrink-0">6ms</span>
                   </div>
                 </div>
               </details>
+
+              <!-- 内容块3：Token 与成本区（PRD §6.3 Block 3，默认展开） -->
+              <details open class="border border-slate-200 rounded-lg">
+                <summary class="flex items-center gap-1.5 px-3 py-2.5 cursor-pointer list-none">
+                  <span class="text-xs font-semibold text-slate-700"><i class="fa-solid fa-coins mr-1.5 text-slate-400"></i>内容块3：Token 与成本</span>
+                </summary>
+                <div class="border-t border-slate-100 px-3 py-3">
+                  <table class="w-full text-xs">
+                    <tbody class="divide-y divide-slate-50">
+                      <tr><td class="py-1.5 text-slate-500">输入 Token</td><td class="py-1.5 text-right font-medium text-slate-700">2,000</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">输出 Token</td><td class="py-1.5 text-right font-medium text-slate-700">800</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">缓存命中 Token（Prompt Cache）</td><td class="py-1.5 text-right text-slate-400">—</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">实际计费 Token（输入）</td><td class="py-1.5 text-right font-medium text-slate-700">2,000</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">输入单价</td><td class="py-1.5 text-right text-slate-600">¥8.0000 / 1M tokens</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">输出单价</td><td class="py-1.5 text-right text-slate-600">¥24.0000 / 1M tokens</td></tr>
+                      <tr class="border-t-2 border-slate-200"><td class="pt-2 pb-1 font-semibold text-slate-700">本次请求成本</td><td class="pt-2 pb-1 text-right font-bold text-blue-700">¥0.0342</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">成本归因</td><td class="py-1.5 text-right text-slate-600">core-api / prod-key-001</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">是否命中语义缓存</td><td class="py-1.5 text-right"><span class="text-slate-400">否</span></td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+
+              <!-- 内容块4：Fallback 链区（PRD §6.3 Block 4，仅 is_fallback=true 时展示） -->
+              <details class="border border-slate-200 rounded-lg opacity-60">
+                <summary class="flex items-center gap-1.5 px-3 py-2.5 cursor-pointer list-none">
+                  <span class="text-xs font-semibold text-slate-700"><i class="fa-solid fa-diagram-project mr-1.5 text-slate-400"></i>内容块4：Fallback 链</span>
+                  <span class="ml-auto inline-flex items-center px-1.5 py-0.5 rounded text-xs bg-green-50 text-green-600">本次未触发</span>
+                </summary>
+                <div class="border-t border-slate-100 px-3 py-2.5">
+                  <p class="text-xs text-slate-400 italic">本次请求无 fallback，策略配置的备用链为：deepseek-v3 → qwen-plus → 熔断返回。</p>
+                </div>
+              </details>
+
+              <!-- 内容块5：审计信息区（PRD §6.3 Block 5，SECURITY_OFFICER 默认展开，其他角色默认折叠） -->
+              <details class="border border-amber-100 rounded-lg bg-amber-50/30">
+                <summary class="flex items-center gap-1.5 px-3 py-2.5 cursor-pointer list-none">
+                  <span class="text-xs font-semibold text-slate-700"><i class="fa-solid fa-shield-halved mr-1.5 text-amber-400"></i>内容块5：审计信息</span>
+                  <span class="ml-auto text-xs text-amber-500">仅安全合规员默认展开</span>
+                </summary>
+                <div class="border-t border-amber-100 px-3 py-3">
+                  <table class="w-full text-xs">
+                    <tbody class="divide-y divide-amber-50">
+                      <tr><td class="py-1.5 text-slate-500">合规策略</td><td class="py-1.5 text-right font-medium text-slate-700">cn-only-v2</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">数据等级</td><td class="py-1.5 text-right"><span class="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 font-medium">L1 内部</span></td></tr>
+                      <tr><td class="py-1.5 text-slate-500">内容安全检查</td><td class="py-1.5 text-right"><span class="text-green-600 font-medium">passed</span></td></tr>
+                      <tr><td class="py-1.5 text-slate-500">命中类别</td><td class="py-1.5 text-right text-slate-400">—</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">请求内容哈希（SHA256）</td><td class="py-1.5 text-right font-mono text-slate-500 text-[10px]">a3f8...c291</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">日志留存策略</td><td class="py-1.5 text-right text-slate-600">热7天 / 温30天 / 冷180天</td></tr>
+                      <tr><td class="py-1.5 text-slate-500">审计日志 ID</td><td class="py-1.5 text-right font-mono text-blue-600 text-[10px] cursor-pointer hover:underline">aud_01HXZ7K3M2AB</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+
             </div>
           </div>
         </div>
@@ -2738,6 +3014,323 @@
         <div class="flex items-center justify-between mb-5"><div><h1 class="text-xl font-semibold text-slate-900">合规策略</h1><p class="text-sm text-slate-500 mt-1">按项目配置数据分级、地域控制、模型白名单和日志留存。</p></div><button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium"><i class="fa-solid fa-plus mr-1.5"></i>新建策略</button></div>
         <div class="grid grid-cols-4 gap-4 mb-5"><div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"><p class="text-xs text-slate-500 mb-2">生效策略</p><p class="text-2xl font-bold text-slate-900">9</p><p class="text-xs text-slate-400 mt-1">覆盖 14 个项目</p></div><div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"><p class="text-xs text-slate-500 mb-2">今日拦截</p><p class="text-2xl font-bold text-red-600">38</p><p class="text-xs text-slate-400 mt-1">PII与出境限制</p></div><div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"><p class="text-xs text-slate-500 mb-2">零数据保留</p><p class="text-2xl font-bold text-slate-900">5</p><p class="text-xs text-slate-400 mt-1">生产项目</p></div><div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"><p class="text-xs text-slate-500 mb-2">待审批变更</p><p class="text-2xl font-bold text-amber-600">2</p><p class="text-xs text-slate-400 mt-1">P0/P1规则</p></div></div>
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"><div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between"><h2 class="text-sm font-semibold text-slate-800">策略列表</h2><button class="bg-white border border-slate-200 text-slate-700 px-3 py-2 rounded-lg text-sm"><i class="fa-solid fa-file-export mr-1.5"></i>导出合规报告</button></div><table class="w-full text-sm"><thead><tr class="bg-slate-50 border-b border-slate-200"><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">策略名称</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">范围</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">数据等级</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">地域/模型</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">留存</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">状态</th></tr></thead><tbody class="divide-y divide-slate-100"><tr><td class="px-5 py-3 font-medium">金融生产默认</td><td class="px-5 py-3">项目: finance-prod</td><td class="px-5 py-3">L3/L4</td><td class="px-5 py-3">中国大陆 / 国产白名单</td><td class="px-5 py-3">元数据</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">生效</span></td></tr><tr><td class="px-5 py-3 font-medium">研发测试宽松策略</td><td class="px-5 py-3">项目: dev-lab</td><td class="px-5 py-3">L0/L1</td><td class="px-5 py-3">全球 / 全模型</td><td class="px-5 py-3">脱敏内容</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">生效</span></td></tr><tr><td class="px-5 py-3 font-medium">PII强脱敏策略</td><td class="px-5 py-3">租户全局</td><td class="px-5 py-3">L3</td><td class="px-5 py-3">禁止出境</td><td class="px-5 py-3">零保留</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">待审批</span></td></tr></tbody></table></div>
+      </div>
+
+      <!-- ===== 新增：模型对比 (#5) ===== -->
+      <div id="models-compare" class="section">
+        <div class="flex items-center justify-between mb-5">
+          <div><h1 class="text-xl font-semibold text-slate-900">模型对比</h1><p class="text-sm text-slate-500 mt-1">最多同时对比 4 个模型，全维度横向比较</p></div>
+          <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium" onclick="navigate('models')"><i class="fa-solid fa-plus mr-1.5"></i>添加模型</button>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-x-auto">
+          <table class="w-full text-sm min-w-[700px]">
+            <thead>
+              <tr class="border-b border-slate-200 bg-slate-50">
+                <th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase w-40">对比维度</th>
+                <th class="px-5 py-3 text-center"><div class="text-sm font-semibold text-slate-800">qwen-max</div><div class="text-xs text-slate-400">阿里云百炼</div></th>
+                <th class="px-5 py-3 text-center"><div class="text-sm font-semibold text-slate-800">gpt-4o</div><div class="text-xs text-slate-400">OpenAI</div></th>
+                <th class="px-5 py-3 text-center"><div class="text-sm font-semibold text-slate-800">deepseek-v3</div><div class="text-xs text-slate-400">深度求索</div></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr class="bg-slate-50/50"><td colspan="4" class="px-5 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">基础信息</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">上下文长度</td><td class="px-5 py-3 text-center text-sm font-medium">128K</td><td class="px-5 py-3 text-center text-sm font-medium">128K</td><td class="px-5 py-3 text-center text-sm font-medium">64K</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">最大输出</td><td class="px-5 py-3 text-center text-sm">8K</td><td class="px-5 py-3 text-center text-sm">16K</td><td class="px-5 py-3 text-center text-sm">8K</td></tr>
+              <tr class="bg-slate-50/50"><td colspan="4" class="px-5 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">能力标签</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">对话</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-green-600">✓</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">代码</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-green-600">✓</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">多模态</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-slate-300">—</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">函数调用</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-green-600">✓</td></tr>
+              <tr class="bg-slate-50/50"><td colspan="4" class="px-5 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">价格（¥/1M tokens）</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">输入</td><td class="px-5 py-3 text-center text-sm font-medium text-green-700">¥8.00</td><td class="px-5 py-3 text-center text-sm font-medium text-slate-700">¥174.35</td><td class="px-5 py-3 text-center text-sm font-medium text-green-700 bg-green-50/50">¥1.00 <i class="fa-solid fa-medal text-amber-400 text-xs" title="最优价格"></i></td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">输出</td><td class="px-5 py-3 text-center text-sm font-medium text-slate-700">¥24.00</td><td class="px-5 py-3 text-center text-sm font-medium text-slate-700">¥523.04</td><td class="px-5 py-3 text-center text-sm font-medium text-green-700 bg-green-50/50">¥2.00 <i class="fa-solid fa-medal text-amber-400 text-xs" title="最优价格"></i></td></tr>
+              <tr class="bg-slate-50/50"><td colspan="4" class="px-5 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">性能指标（过去7天平台数据）</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">P95 延迟</td><td class="px-5 py-3 text-center text-sm">1,240ms</td><td class="px-5 py-3 text-center text-sm">1,820ms</td><td class="px-5 py-3 text-center text-sm text-green-700 bg-green-50/50">980ms <i class="fa-solid fa-medal text-amber-400 text-xs"></i></td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">月均可用率</td><td class="px-5 py-3 text-center text-sm">99.82%</td><td class="px-5 py-3 text-center text-sm text-green-700 bg-green-50/50">99.95% <i class="fa-solid fa-medal text-amber-400 text-xs"></i></td><td class="px-5 py-3 text-center text-sm">99.71%</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">质量综合评分</td><td class="px-5 py-3 text-center text-sm font-semibold">87.2</td><td class="px-5 py-3 text-center text-sm font-semibold text-blue-700 bg-blue-50/50">92.1 <i class="fa-solid fa-medal text-amber-400 text-xs"></i></td><td class="px-5 py-3 text-center text-sm font-semibold">84.6</td></tr>
+              <tr class="bg-slate-50/50"><td colspan="4" class="px-5 py-2 text-xs font-semibold text-slate-400 uppercase tracking-wide">合规认证</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">ISO 27001</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-green-600">✓</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">数据不出境</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-slate-300">—</td><td class="px-5 py-3 text-center text-green-600">✓</td></tr>
+              <tr><td class="px-5 py-3 text-xs text-slate-500">等保三级</td><td class="px-5 py-3 text-center text-green-600">✓</td><td class="px-5 py-3 text-center text-slate-300">—</td><td class="px-5 py-3 text-center text-green-600">✓</td></tr>
+              <tr class="border-t-2 border-slate-200"><td class="px-5 py-3 text-xs text-slate-500">快速操作</td>
+                <td class="px-5 py-3 text-center"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="showToast('已加入收藏')">收藏</button><button class="text-xs text-slate-500 hover:text-slate-700" onclick="navigate('models')">详情</button></td>
+                <td class="px-5 py-3 text-center"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="showToast('已加入收藏')">收藏</button><button class="text-xs text-slate-500 hover:text-slate-700" onclick="navigate('models')">详情</button></td>
+                <td class="px-5 py-3 text-center"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="showToast('已加入收藏')">收藏</button><button class="text-xs text-slate-500 hover:text-slate-700" onclick="navigate('models')">详情</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== 新增：项目环境管理 (#6) ===== -->
+      <div id="proj-envmgmt" class="section">
+        <div class="flex items-center justify-between mb-5"><div><h1 class="text-xl font-semibold text-slate-900">环境管理</h1><p class="text-sm text-slate-500 mt-1">每个项目最多三个环境（dev / staging / prod），配置相互独立</p></div></div>
+        <div class="grid grid-cols-3 gap-5 mb-6">
+          <!-- dev 环境卡片 -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-5 py-3 bg-amber-50 border-b border-amber-100 flex items-center gap-2"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-amber-100 text-amber-700">dev</span><span class="text-sm font-medium text-slate-700">开发环境</span></div>
+            <div class="p-5 space-y-3 text-xs">
+              <div class="flex justify-between"><span class="text-slate-500">API Keys</span><span class="font-medium">6 个</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">路由策略</span><span class="text-blue-600">cost-save-dev</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">限速（RPM）</span><span class="font-medium">100</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">月度预算</span><span class="font-medium">¥500</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">允许模型</span><span class="font-medium">全部（12 个）</span></div>
+              <div class="pt-3 border-t border-slate-100 flex gap-2">
+                <button class="flex-1 text-xs text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg" onclick="showToast('编辑 dev 环境配置')">编辑配置</button>
+                <button class="text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-200 px-3 py-1.5 rounded-lg" onclick="openEnvPromoteModal('dev','staging')"><i class="fa-solid fa-arrow-right mr-1"></i>晋级 staging</button>
+              </div>
+            </div>
+          </div>
+          <!-- staging 环境卡片 -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-5 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-slate-200 text-slate-600">staging</span><span class="text-sm font-medium text-slate-700">预发布环境</span></div>
+            <div class="p-5 space-y-3 text-xs">
+              <div class="flex justify-between"><span class="text-slate-500">API Keys</span><span class="font-medium">3 个</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">路由策略</span><span class="text-blue-600">balanced-v3</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">限速（RPM）</span><span class="font-medium">500</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">月度预算</span><span class="font-medium">¥2,000</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">允许模型</span><span class="font-medium">白名单（8 个）</span></div>
+              <div class="pt-3 border-t border-slate-100 flex gap-2">
+                <button class="flex-1 text-xs text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg" onclick="showToast('编辑 staging 环境配置')">编辑配置</button>
+                <button class="text-xs text-amber-600 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-lg" onclick="openEnvPromoteModal('staging','prod')"><i class="fa-solid fa-arrow-right mr-1"></i>晋级 prod</button>
+              </div>
+            </div>
+          </div>
+          <!-- prod 环境卡片 -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden border-l-4 border-l-green-500">
+            <div class="px-5 py-3 bg-green-50 border-b border-green-100 flex items-center gap-2"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-700">prod</span><span class="text-sm font-medium text-slate-700">生产环境</span><span class="ml-auto inline-flex items-center gap-1 text-xs text-green-700 bg-green-50"><i class="fa-solid fa-circle text-green-500 text-[8px]"></i>主环境</span></div>
+            <div class="p-5 space-y-3 text-xs">
+              <div class="flex justify-between"><span class="text-slate-500">API Keys</span><span class="font-medium">2 个</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">路由策略</span><span class="text-blue-600">quality-first</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">限速（RPM）</span><span class="font-medium">3,000</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">月度预算</span><span class="font-medium">¥30,000</span></div>
+              <div class="flex justify-between"><span class="text-slate-500">允许模型</span><span class="font-medium">审批名单（5 个）</span></div>
+              <div class="pt-3 border-t border-slate-100"><button class="w-full text-xs text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 px-3 py-1.5 rounded-lg" onclick="showToast('编辑 prod 环境需 Tenant Admin 审批')">编辑配置（需审批）</button></div>
+            </div>
+          </div>
+        </div>
+        <!-- 晋级历史 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-200"><h2 class="text-sm font-semibold text-slate-800">环境晋级历史</h2></div>
+          <table class="w-full text-sm"><thead><tr class="bg-slate-50 border-b border-slate-200"><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">时间</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">来源</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">目标</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">变更内容</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">审批人</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">状态</th></tr></thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50"><td class="px-5 py-3 text-xs text-slate-400">2026-05-18 14:22</td><td class="px-5 py-3"><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-xs">staging</span></td><td class="px-5 py-3"><span class="px-1.5 py-0.5 rounded bg-green-100 text-green-700 text-xs">prod</span></td><td class="px-5 py-3 text-xs text-slate-500">路由策略 quality-first-v2 晋级</td><td class="px-5 py-3 text-xs text-slate-500">admin@acme.com</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">已批准</span></td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-5 py-3 text-xs text-slate-400">2026-05-10 09:11</td><td class="px-5 py-3"><span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-700 text-xs">dev</span></td><td class="px-5 py-3"><span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-xs">staging</span></td><td class="px-5 py-3 text-xs text-slate-500">模型白名单更新，增加 kimi-k2</td><td class="px-5 py-3 text-xs text-slate-500">alice@acme.com</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">已批准</span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <!-- ===== 新增：Trace 异常聚类 (#10 部分) ===== -->
+      <div id="traces-anomaly" class="section">
+        <div class="flex items-center justify-between mb-5"><div><h1 class="text-xl font-semibold text-slate-900">异常聚类</h1><p class="text-sm text-slate-500 mt-1">将相似失败请求自动聚类，快速定位根因</p></div>
+          <div class="flex gap-2"><select class="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white">过去 24h</select><button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium" onclick="showToast('已刷新异常聚类')"><i class="fa-solid fa-rotate mr-1.5"></i>刷新</button></div>
+        </div>
+        <div class="grid grid-cols-3 gap-4 mb-5">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"><p class="text-xs text-slate-500 mb-2">异常聚类数</p><p class="text-2xl font-bold text-red-600">7</p><p class="text-xs text-slate-400 mt-1">较昨日 +3</p></div>
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"><p class="text-xs text-slate-500 mb-2">受影响请求</p><p class="text-2xl font-bold text-amber-600">2,148</p><p class="text-xs text-slate-400 mt-1">占总量 1.67%</p></div>
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5"><p class="text-xs text-slate-500 mb-2">最高频异常</p><p class="text-2xl font-bold text-slate-900">429</p><p class="text-xs text-slate-400 mt-1">Rate Limited 1,312次</p></div>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-200"><h2 class="text-sm font-semibold text-slate-800">聚类列表</h2></div>
+          <table class="w-full text-sm"><thead><tr class="bg-slate-50 border-b border-slate-200"><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">聚类 ID</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">模式摘要</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">错误码</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">涉及模型</th><th class="text-right px-5 py-3 text-xs font-semibold text-slate-500 uppercase">发生次数</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">首次 / 最近</th></tr></thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50 cursor-pointer" onclick="showToast('查看聚类 A#001 详情')"><td class="px-5 py-3 font-mono text-xs text-blue-600">A#001</td><td class="px-5 py-3 text-sm text-slate-700">上游限速 429，持续约 3 分钟</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-amber-50 text-amber-700">HTTP 429</span></td><td class="px-5 py-3 text-sm">deepseek-v3</td><td class="px-5 py-3 text-right font-medium text-red-600">1,312</td><td class="px-5 py-3 text-xs text-slate-400">10:12 / 13:45</td></tr>
+            <tr class="hover:bg-slate-50 cursor-pointer" onclick="showToast('查看聚类 A#002 详情')"><td class="px-5 py-3 font-mono text-xs text-blue-600">A#002</td><td class="px-5 py-3 text-sm text-slate-700">合规策略拦截，PII 检测命中</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-red-50 text-red-700">HTTP 451</span></td><td class="px-5 py-3 text-sm">qwen-max</td><td class="px-5 py-3 text-right font-medium text-amber-600">487</td><td class="px-5 py-3 text-xs text-slate-400">08:33 / 14:02</td></tr>
+            <tr class="hover:bg-slate-50 cursor-pointer" onclick="showToast('查看聚类 A#003 详情')"><td class="px-5 py-3 font-mono text-xs text-blue-600">A#003</td><td class="px-5 py-3 text-sm text-slate-700">Timeout（上游 30s 超时）</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">timeout</span></td><td class="px-5 py-3 text-sm">gpt-4o</td><td class="px-5 py-3 text-right font-medium text-amber-600">214</td><td class="px-5 py-3 text-xs text-slate-400">11:08 / 12:59</td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <!-- ===== 新增：策略仿真 (#8) ===== -->
+      <div id="policy-simulate" class="section">
+        <div class="flex items-center justify-between mb-5"><div><h1 class="text-xl font-semibold text-slate-900">策略仿真</h1><p class="text-sm text-slate-500 mt-1">在不影响生产流量的前提下，测试路由策略的决策逻辑</p></div><button class="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1" onclick="navigate('policy')"><i class="fa-solid fa-arrow-left text-xs"></i> 返回策略列表</button></div>
+        <div class="grid grid-cols-5 gap-5">
+          <div class="col-span-2 space-y-4">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+              <h2 class="text-sm font-semibold text-slate-800 mb-4">仿真参数</h2>
+              <div class="space-y-3">
+                <div><label class="block text-xs font-medium text-slate-600 mb-1">选择策略</label><select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"><option>proj-balanced-v3（当前）</option><option>cost-save-v2</option><option>quality-first</option></select></div>
+                <div><label class="block text-xs font-medium text-slate-600 mb-1">策略版本</label><select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"><option>v7（当前）</option><option>v6</option><option>v5</option></select></div>
+                <div><label class="block text-xs font-medium text-slate-600 mb-1">预估 Input Token 数</label><input type="number" value="2000" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"></div>
+                <div><label class="block text-xs font-medium text-slate-600 mb-1">预估 Output Token 数</label><input type="number" value="800" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"></div>
+                <div><label class="block text-xs font-medium text-slate-600 mb-1">允许缓存</label><select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white"><option>是</option><option>否</option></select></div>
+                <div><label class="block text-xs font-medium text-slate-600 mb-1">请求标签（可选）</label><input placeholder="key=value，多个用逗号分隔" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm"></div>
+              </div>
+              <div class="mt-4 flex gap-2">
+                <button class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium" onclick="runPolicySim()"><i class="fa-solid fa-play mr-1.5"></i>运行仿真</button>
+                <button class="text-sm text-slate-500 hover:text-slate-700 px-3 py-2 border border-slate-200 rounded-lg" onclick="showToast('批量仿真功能：上传JSON数组，最多100条')">批量</button>
+              </div>
+            </div>
+          </div>
+          <div class="col-span-3">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5" id="simResultPanel">
+              <h2 class="text-sm font-semibold text-slate-800 mb-4">仿真结果</h2>
+              <div class="text-center py-12 text-slate-300">
+                <i class="fa-solid fa-play-circle text-4xl mb-3 block"></i>
+                <p class="text-sm text-slate-400">点击「运行仿真」查看路由决策结果</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 新增：版本历史 (#9) ===== -->
+      <div id="policy-versions" class="section">
+        <div class="flex items-center justify-between mb-5"><div><h1 class="text-xl font-semibold text-slate-900">版本历史</h1><p class="text-sm text-slate-500 mt-1">查看策略所有历史版本，支持一键回滚到任意已批准版本</p></div><button class="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1" onclick="navigate('policy')"><i class="fa-solid fa-arrow-left text-xs"></i> 返回策略列表</button></div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+            <h2 class="text-sm font-semibold text-slate-800">策略：proj-balanced-v3</h2>
+            <span class="text-xs text-slate-400">共 7 个版本</span>
+            <select class="ml-auto border border-slate-200 rounded-lg px-3 py-1.5 text-xs bg-white">全部策略</select>
+          </div>
+          <table class="w-full text-sm"><thead><tr class="bg-slate-50 border-b border-slate-200"><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">版本</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">状态</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">变更摘要</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">创建人</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">审批</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">时间</th><th class="px-5 py-3"></th></tr></thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50 bg-blue-50/30"><td class="px-5 py-3 font-mono text-sm font-semibold text-blue-700">v7</td><td class="px-5 py-3"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700"><i class="fa-solid fa-circle text-green-500 text-[8px]"></i>当前生效</span></td><td class="px-5 py-3 text-xs text-slate-600">新增 kimi-k2 为候选模型，权重 20%</td><td class="px-5 py-3 text-xs text-slate-500">alice@acme.com</td><td class="px-5 py-3"><span class="text-xs text-green-600">已批准 by admin</span></td><td class="px-5 py-3 text-xs text-slate-400">2026-05-18</td><td class="px-5 py-3 text-right"><span class="text-xs text-slate-300 italic">当前版本</span></td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-mono text-sm">v6</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-500">已替代</span></td><td class="px-5 py-3 text-xs text-slate-600">调整 deepseek 权重 30%→25%</td><td class="px-5 py-3 text-xs text-slate-500">alice@acme.com</td><td class="px-5 py-3"><span class="text-xs text-green-600">已批准</span></td><td class="px-5 py-3 text-xs text-slate-400">2026-05-10</td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700" onclick="showConfirm('回滚到 v6','将切换为 v6，当前 v7 变为 superseded。此操作不需重新审批。',()=>showToast('已回滚至 v6，立即生效'))">回滚至此版本</button></td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-mono text-sm">v5</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-500">已替代</span></td><td class="px-5 py-3 text-xs text-slate-600">启用语义缓存前置检查</td><td class="px-5 py-3 text-xs text-slate-500">bob@acme.com</td><td class="px-5 py-3"><span class="text-xs text-green-600">已批准</span></td><td class="px-5 py-3 text-xs text-slate-400">2026-04-28</td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700" onclick="showConfirm('回滚到 v5','将切换为 v5，当前 v7 变为 superseded。',()=>showToast('已回滚至 v5'))">回滚至此版本</button></td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-mono text-sm">v4</td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs bg-red-50 text-red-600">已拒绝</span></td><td class="px-5 py-3 text-xs text-slate-600">尝试将 gpt-4o 权重提升至 50%（超预算）</td><td class="px-5 py-3 text-xs text-slate-500">carol@acme.com</td><td class="px-5 py-3"><span class="text-xs text-red-500">已拒绝 by admin</span></td><td class="px-5 py-3 text-xs text-slate-400">2026-04-15</td><td class="px-5 py-3 text-right"><span class="text-xs text-slate-300 italic">已拒绝，不可回滚</span></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <!-- ===== 新增：预算管理 (#7) ===== -->
+      <div id="cost-budget" class="section">
+        <div class="flex items-center justify-between mb-5"><div><h1 class="text-xl font-semibold text-slate-900">预算管理</h1><p class="text-sm text-slate-500 mt-1">租户 → 项目 → Key 三级预算管控，支持告警阈值与硬封顶</p></div><button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium" onclick="showToast('设置预算功能演示')"><i class="fa-solid fa-plus mr-1.5"></i>设置预算</button></div>
+        <!-- 三级预算层级卡片 -->
+        <div class="grid grid-cols-3 gap-5 mb-6">
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center gap-2 mb-4"><i class="fa-solid fa-building text-blue-500 text-sm"></i><h3 class="text-sm font-semibold text-slate-800">租户总预算</h3></div>
+            <div class="mb-3"><div class="flex justify-between text-xs text-slate-500 mb-1"><span>本月消费</span><span class="font-medium text-slate-700">¥42,380</span></div><div class="bar-track"><div class="bar-fill" style="width:70.6%"></div></div><div class="flex justify-between text-xs mt-1"><span class="text-slate-400">月预算 ¥60,000</span><span class="text-amber-600 font-medium">70.6%</span></div></div>
+            <div class="text-xs space-y-1 text-slate-500"><div class="flex justify-between"><span>告警阈值1</span><span>80%（邮件）</span></div><div class="flex justify-between"><span>告警阈值2</span><span>95%（邮件+企微）</span></div><div class="flex justify-between"><span>硬封顶</span><span class="text-red-500 font-medium">已开启</span></div></div>
+          </div>
+          <div class="col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="px-5 py-4 border-b border-slate-200"><h3 class="text-sm font-semibold text-slate-800">项目预算明细</h3></div>
+            <table class="w-full text-sm"><thead><tr class="bg-slate-50 border-b border-slate-200"><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">项目</th><th class="text-right px-5 py-3 text-xs font-semibold text-slate-500 uppercase">月预算</th><th class="text-right px-5 py-3 text-xs font-semibold text-slate-500 uppercase">已用</th><th class="px-5 py-3 text-xs font-semibold text-slate-500 uppercase w-28">使用率</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">状态</th><th class="px-5 py-3"></th></tr></thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-medium">core-api</td><td class="px-5 py-3 text-right">¥30,000</td><td class="px-5 py-3 text-right font-medium text-amber-600">¥24,800</td><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="flex-1 bar-track"><div class="bar-fill bg-amber-500" style="width:82.7%"></div></div><span class="text-xs text-amber-600 font-medium w-10 text-right">82.7%</span></div></td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700"><i class="fa-solid fa-triangle-exclamation text-xs mr-1"></i>预警</span></td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700" onclick="showToast('编辑 core-api 预算')">编辑</button></td></tr>
+              <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-medium">crm-bot</td><td class="px-5 py-3 text-right">¥15,000</td><td class="px-5 py-3 text-right font-medium text-slate-700">¥9,240</td><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="flex-1 bar-track"><div class="bar-fill" style="width:61.6%"></div></div><span class="text-xs text-slate-600 w-10 text-right">61.6%</span></div></td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">正常</span></td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700" onclick="showToast('编辑 crm-bot 预算')">编辑</button></td></tr>
+              <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-medium">dev-lab</td><td class="px-5 py-3 text-right">¥8,000</td><td class="px-5 py-3 text-right font-medium text-red-600">¥8,180</td><td class="px-5 py-3"><div class="flex items-center gap-2"><div class="flex-1 bar-track"><div class="bar-fill bg-red-500" style="width:100%"></div></div><span class="text-xs text-red-600 font-bold w-10 text-right">102%</span></div></td><td class="px-5 py-3"><span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700"><i class="fa-solid fa-ban text-xs mr-1"></i>超支限流</span></td><td class="px-5 py-3 text-right"><button class="text-xs text-red-600 hover:text-red-700 font-medium" onclick="navigate('approval-center')">申请追加</button></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <!-- 成本预测曲线 -->
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <div class="flex items-center justify-between mb-4"><h3 class="text-sm font-semibold text-slate-800">成本预测曲线（全月）</h3><span class="text-xs text-slate-400">基于过去 21 天日均，外推至月底</span></div>
+          <div class="relative h-48 border border-slate-100 rounded-lg bg-slate-50 overflow-hidden">
+            <svg viewBox="0 0 600 160" class="w-full h-full">
+              <!-- grid -->
+              <line x1="0" y1="120" x2="600" y2="120" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4 3"/>
+              <line x1="0" y1="80" x2="600" y2="80" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4 3"/>
+              <line x1="0" y1="40" x2="600" y2="40" stroke="#E2E8F0" stroke-width="1" stroke-dasharray="4 3"/>
+              <!-- budget line (¥60K) -->
+              <line x1="0" y1="40" x2="600" y2="40" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="6 3"/>
+              <text x="4" y="36" font-size="9" fill="#EF4444">预算上限 ¥60,000</text>
+              <!-- actual cost line (days 1-21) -->
+              <polyline points="0,150 60,148 120,142 180,134 240,124 300,115 360,105 420,94 480,82 540,70" fill="none" stroke="#2563EB" stroke-width="2"/>
+              <circle cx="540" cy="70" r="3" fill="#2563EB"/>
+              <!-- prediction (days 22-31) dashed -->
+              <polyline points="540,70 570,62 600,54" fill="none" stroke="#2563EB" stroke-width="2" stroke-dasharray="5 3"/>
+              <!-- labels -->
+              <text x="270" y="118" font-size="9" fill="#2563EB" font-weight="600">¥42,380 (今日)</text>
+              <text x="540" y="52" font-size="9" fill="#64748B">预测 ¥58,200</text>
+            </svg>
+          </div>
+          <p class="text-xs text-slate-400 mt-2"><i class="fa-solid fa-circle-info mr-1"></i>预测全月消费约 <span class="font-semibold text-amber-600">¥58,200</span>，已达预算 <span class="font-semibold text-amber-600">97%</span>，建议申请追加或控制流量。</p>
+        </div>
+      </div>
+
+      <!-- ===== 新增：内容安全 Guardrails (#11) ===== -->
+      <div id="compliance-guardrails" class="section">
+        <div class="flex items-center justify-between mb-5"><div><h1 class="text-xl font-semibold text-slate-900">内容安全（Guardrails）</h1><p class="text-sm text-slate-500 mt-1">配置请求/响应检查规则，支持关键词拦截、正则、PII检测、主题分类器、外部审核服务</p></div>
+          <div class="flex gap-2"><button class="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 px-3 py-2 rounded-lg text-sm font-medium" onclick="showToast('导入规则 JSON')"><i class="fa-solid fa-file-import mr-1.5"></i>导入</button><button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg text-sm font-medium" onclick="openModal('modal-guardrail-add')"><i class="fa-solid fa-plus mr-1.5"></i>新建规则</button></div>
+        </div>
+        <!-- 说明信息栏 -->
+        <div class="flex items-start gap-3 mb-5 bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 text-xs text-blue-700">
+          <i class="fa-solid fa-circle-info mt-0.5 flex-shrink-0"></i>
+          <span>规则按从上到下顺序检查，<strong>第一个命中的规则</strong>生效。可拖拽调整优先级。<strong>block</strong> = 拒绝请求返回 451；<strong>flag</strong> = 记录但放行；<strong>redact</strong> = 脱敏后放行（仅 PII 类型）。</span>
+        </div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-5">
+          <div class="px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+            <h2 class="text-sm font-semibold text-slate-800">规则列表</h2>
+            <span class="text-xs text-slate-400">按优先级排序</span>
+            <div class="ml-auto flex gap-2">
+              <input placeholder="搜索规则名称..." class="border border-slate-200 rounded-lg px-3 py-1.5 text-xs bg-white w-48">
+              <button class="bg-white border border-slate-200 text-slate-600 px-3 py-1.5 rounded-lg text-xs hover:bg-slate-50" onclick="showToast('测试规则：输入文本，查看哪条规则被命中')"><i class="fa-solid fa-flask mr-1"></i>测试规则</button>
+            </div>
+          </div>
+          <table class="w-full text-sm"><thead><tr class="bg-slate-50 border-b border-slate-200"><th class="w-8 px-3 py-3"></th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">优先级</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">规则名称</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">类型</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">方向</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">命中动作</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">严重级别</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">启用</th><th class="px-5 py-3"></th></tr></thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50"><td class="px-3 py-3 text-slate-300 cursor-move"><i class="fa-solid fa-grip-vertical text-xs"></i></td><td class="px-5 py-3"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-600 text-white text-xs font-bold">1</span></td><td class="px-5 py-3 font-medium text-slate-800">政治敏感词拦截</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">keyword_block</span></td><td class="px-5 py-3 text-xs">both</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-red-50 text-red-700 font-medium">block</span></td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-red-50 text-red-700">critical</span></td><td class="px-5 py-3"><label class="relative inline-flex cursor-pointer"><input type="checkbox" checked class="sr-only peer"><div class="w-8 h-4 bg-slate-200 peer-checked:bg-green-500 rounded-full peer transition-colors"></div><div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow peer-checked:translate-x-4 transition-transform"></div></label></td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="showToast('编辑规则')">编辑</button><button class="text-xs text-red-400 hover:text-red-600" onclick="showConfirm('删除规则','确认删除此规则？',()=>showToast('规则已删除'))">删除</button></td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-3 py-3 text-slate-300 cursor-move"><i class="fa-solid fa-grip-vertical text-xs"></i></td><td class="px-5 py-3"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-bold">2</span></td><td class="px-5 py-3 font-medium text-slate-800">PII 自动脱敏</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">pii_detection</span></td><td class="px-5 py-3 text-xs">input</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700 font-medium">redact</span></td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-amber-50 text-amber-700">high</span></td><td class="px-5 py-3"><label class="relative inline-flex cursor-pointer"><input type="checkbox" checked class="sr-only peer"><div class="w-8 h-4 bg-slate-200 peer-checked:bg-green-500 rounded-full peer transition-colors"></div><div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow peer-checked:translate-x-4 transition-transform"></div></label></td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="showToast('编辑规则')">编辑</button><button class="text-xs text-red-400 hover:text-red-600" onclick="showConfirm('删除规则','确认删除此规则？',()=>showToast('规则已删除'))">删除</button></td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-3 py-3 text-slate-300 cursor-move"><i class="fa-solid fa-grip-vertical text-xs"></i></td><td class="px-5 py-3"><span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-400 text-white text-xs font-bold">3</span></td><td class="px-5 py-3 font-medium text-slate-800">违规输出标记</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">topic_classifier</span></td><td class="px-5 py-3 text-xs">output</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-amber-50 text-amber-700 font-medium">flag</span></td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">medium</span></td><td class="px-5 py-3"><label class="relative inline-flex cursor-pointer"><input type="checkbox" checked class="sr-only peer"><div class="w-8 h-4 bg-slate-200 peer-checked:bg-green-500 rounded-full peer transition-colors"></div><div class="absolute left-0.5 top-0.5 w-3 h-3 bg-white rounded-full shadow peer-checked:translate-x-4 transition-transform"></div></label></td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="showToast('编辑规则')">编辑</button><button class="text-xs text-red-400 hover:text-red-600" onclick="showConfirm('删除规则','确认删除此规则？',()=>showToast('规则已删除'))">删除</button></td></tr>
+          </tbody></table>
+        </div>
+      </div>
+
+      <!-- ===== 新增：合规报告 ===== -->
+      <div id="compliance-reports" class="section">
+        <div class="flex items-center justify-between mb-5"><div><h1 class="text-xl font-semibold text-slate-900">合规报告</h1><p class="text-sm text-slate-500 mt-1">按需生成月度合规摘要、审计报告、内容安全报告</p></div></div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div class="px-5 py-4 border-b border-slate-200"><h2 class="text-sm font-semibold text-slate-800">可生成报告类型</h2></div>
+          <div class="divide-y divide-slate-100">
+            <div class="px-5 py-4 flex items-center justify-between hover:bg-slate-50"><div><p class="text-sm font-medium text-slate-800">月度合规摘要</p><p class="text-xs text-slate-400 mt-0.5">各策略生效情况、命中次数、拦截次数 · 每月1日自动生成</p></div><div class="flex gap-2"><select class="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white"><option>2026年5月</option><option>2026年4月</option></select><button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs" onclick="showToast('正在生成月度合规摘要，完成后将发送邮件通知')">生成 PDF</button></div></div>
+            <div class="px-5 py-4 flex items-center justify-between hover:bg-slate-50"><div><p class="text-sm font-medium text-slate-800">数据访问审计报告</p><p class="text-xs text-slate-400 mt-0.5">按用户/Key 的数据访问记录 · 最大时间窗口 90 天</p></div><div class="flex gap-2"><select class="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white"><option>最近 30 天</option><option>最近 90 天</option></select><button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs" onclick="showToast('正在生成审计报告（异步任务），完成后发邮件通知')">导出 Excel</button></div></div>
+            <div class="px-5 py-4 flex items-center justify-between hover:bg-slate-50"><div><p class="text-sm font-medium text-slate-800">内容安全报告</p><p class="text-xs text-slate-400 mt-0.5">Guardrails 命中详情，含规则、类别、触发请求概要</p></div><div class="flex gap-2"><select class="border border-slate-200 rounded-lg px-2 py-1 text-xs bg-white"><option>最近 7 天</option><option>最近 30 天</option></select><button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs" onclick="showToast('正在生成内容安全报告')">生成 PDF</button></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 新增：SSO 配置 (#12) ===== -->
+      <div id="team-sso" class="section">
+        <div class="flex items-center justify-between mb-5"><div><h1 class="text-xl font-semibold text-slate-900">SSO 配置</h1><p class="text-sm text-slate-500 mt-1">仅 TENANT_OWNER 可访问 · 支持 SAML 2.0 / OIDC 协议</p></div></div>
+        <div class="max-w-2xl space-y-5">
+          <!-- 当前状态 -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4"><h2 class="text-sm font-semibold text-slate-800">当前 SSO 状态</h2><span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600"><i class="fa-solid fa-circle text-slate-300 text-[8px]"></i>未启用</span></div>
+            <p class="text-xs text-slate-500 mb-4">启用 SSO 后，成员登录将跳转至企业 IdP（如 Okta / Azure AD），完成认证后自动绑定到租户。</p>
+            <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-xs text-amber-700"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>启用「强制 SSO」前，请确认至少一名 OWNER 账号不受强制 SSO 约束，防止 IdP 故障导致无法登录。</div>
+          </div>
+          <!-- SAML 配置 -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4"><h2 class="text-sm font-semibold text-slate-800"><i class="fa-solid fa-shield-halved mr-2 text-blue-500"></i>SAML 2.0 配置</h2><span class="text-xs text-slate-400">适用于 Okta / ADFS / Azure AD</span></div>
+            <div class="space-y-3">
+              <div><label class="block text-xs font-medium text-slate-600 mb-1">IdP 元数据 XML</label><div class="border-2 border-dashed border-slate-200 rounded-lg p-4 text-center text-xs text-slate-400 hover:border-blue-300 hover:bg-blue-50/20 cursor-pointer transition-colors" onclick="showToast('选择 IdP 元数据 XML 文件')"><i class="fa-solid fa-file-code text-2xl mb-2 block text-slate-300"></i>点击上传或拖拽 metadata.xml</div></div>
+              <div><label class="block text-xs font-medium text-slate-600 mb-1">SP 实体 ID（自动生成，只读）</label><div class="flex gap-2"><input readonly value="https://maas.example.com/saml/sp/acmecorp" class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-xs bg-slate-50 text-slate-500"><button class="text-xs text-blue-600 hover:text-blue-700 px-3 py-2 border border-slate-200 rounded-lg" onclick="showToast('已复制 SP 实体 ID')"><i class="fa-solid fa-copy"></i></button></div></div>
+              <div><label class="block text-xs font-medium text-slate-600 mb-1">ACS URL（自动生成，只读）</label><div class="flex gap-2"><input readonly value="https://maas.example.com/saml/acs/acmecorp" class="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-xs bg-slate-50 text-slate-500"><button class="text-xs text-blue-600 hover:text-blue-700 px-3 py-2 border border-slate-200 rounded-lg" onclick="showToast('已复制 ACS URL')"><i class="fa-solid fa-copy"></i></button></div></div>
+              <div class="flex justify-end"><button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium" onclick="showToast('SAML 配置已保存，请在 IdP 侧完成配置后测试')">保存 SAML 配置</button></div>
+            </div>
+          </div>
+          <!-- OIDC 配置 -->
+          <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+            <div class="flex items-center justify-between mb-4"><h2 class="text-sm font-semibold text-slate-800"><i class="fa-solid fa-key mr-2 text-violet-500"></i>OIDC 配置</h2><span class="text-xs text-slate-400">标准 OpenID Connect</span></div>
+            <div class="space-y-3">
+              <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs font-medium text-slate-600 mb-1">Client ID</label><input placeholder="your-client-id" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"></div>
+                <div><label class="block text-xs font-medium text-slate-600 mb-1">Client Secret</label><input type="password" placeholder="••••••••" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"></div>
+              </div>
+              <div><label class="block text-xs font-medium text-slate-600 mb-1">发现文档 URL（Well-known URL）</label><input placeholder="https://your-idp.com/.well-known/openid-configuration" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"></div>
+              <div><label class="block text-xs font-medium text-slate-600 mb-1">Scope（空格分隔）</label><input value="openid email profile" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs"></div>
+              <div class="flex justify-end gap-2"><button class="text-sm text-slate-500 hover:text-slate-700 px-4 py-2 border border-slate-200 rounded-lg" onclick="showToast('正在测试 OIDC 连接...')">测试连接</button><button class="bg-violet-600 hover:bg-violet-700 text-white px-4 py-2 rounded-lg text-sm font-medium" onclick="showToast('OIDC 配置已保存')">保存 OIDC 配置</button></div>
+            </div>
+          </div>
+          <!-- 强制SSO -->
+          <div class="bg-white rounded-xl border border-red-100 shadow-sm p-5">
+            <div class="flex items-center justify-between"><div><h2 class="text-sm font-semibold text-slate-800"><i class="fa-solid fa-lock mr-2 text-red-500"></i>强制 SSO</h2><p class="text-xs text-slate-500 mt-0.5">启用后所有成员必须通过 SSO 登录，禁止账号密码登录</p></div><label class="relative inline-flex cursor-pointer items-center gap-2"><input type="checkbox" class="sr-only peer" onchange="showToast(this.checked?'强制SSO已启用，账号密码登录被禁用':'强制SSO已关闭')"><div class="w-11 h-6 bg-slate-200 peer-checked:bg-red-500 rounded-full peer transition-colors"></div><div class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full shadow peer-checked:translate-x-5 transition-transform"></div></label></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== 新增：通知渠道 (#13 部分) ===== -->
+      <div id="alert-channels" class="section">
+        <div class="flex items-center justify-between mb-5"><div><h1 class="text-xl font-semibold text-slate-900">通知渠道</h1><p class="text-sm text-slate-500 mt-1">配置告警通知的发送目标，每条告警规则最多绑定 5 个渠道</p></div><button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium" onclick="openModal('modal-add-channel')"><i class="fa-solid fa-plus mr-1.5"></i>新建渠道</button></div>
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <table class="w-full text-sm"><thead><tr class="bg-slate-50 border-b border-slate-200"><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">渠道名称</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">类型</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">目标</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">绑定规则数</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">最后测试</th><th class="px-5 py-3"></th></tr></thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-medium">飞书研发群</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700">飞书机器人</span></td><td class="px-5 py-3 text-xs text-slate-500 font-mono">https://open.feishu.cn/...***</td><td class="px-5 py-3 text-center">3</td><td class="px-5 py-3 text-xs text-green-600">成功 · 5分钟前</td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="showToast('正在发送测试消息到「飞书研发群」...')">测试</button><button class="text-xs text-slate-400 hover:text-slate-600" onclick="showToast('编辑渠道')">编辑</button></td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-medium">运维邮件组</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-slate-100 text-slate-600">邮件</span></td><td class="px-5 py-3 text-xs text-slate-500">ops@acme.com, admin@acme.com</td><td class="px-5 py-3 text-center">5</td><td class="px-5 py-3 text-xs text-green-600">成功 · 1小时前</td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="showToast('正在发送测试邮件...')">测试</button><button class="text-xs text-slate-400 hover:text-slate-600" onclick="showToast('编辑渠道')">编辑</button></td></tr>
+            <tr class="hover:bg-slate-50"><td class="px-5 py-3 font-medium">PagerDuty 主服务</td><td class="px-5 py-3"><span class="px-2 py-0.5 rounded text-xs bg-orange-50 text-orange-700">PagerDuty</span></td><td class="px-5 py-3 text-xs text-slate-500 font-mono">Integration Key: R****2a</td><td class="px-5 py-3 text-center">2</td><td class="px-5 py-3 text-xs text-red-500">失败 · 2天前</td><td class="px-5 py-3 text-right"><button class="text-xs text-blue-600 hover:text-blue-700 mr-2" onclick="showToast('正在测试 PagerDuty 连接...')">测试</button><button class="text-xs text-slate-400 hover:text-slate-600" onclick="showToast('编辑渠道')">编辑</button></td></tr>
+          </tbody></table>
+        </div>
       </div>
 
     </main>
@@ -3042,61 +3635,121 @@
     </div>
   </div>
 
-  <!-- 弹窗：新建 API Key -->
+  <!-- 弹窗：新建 API Key（PRD §3.3 + §3.4 三层 Scope 树形选择） -->
   <div class="modal-mask fixed inset-0 bg-black/40 items-center justify-center z-50" id="keyModalMask">
-    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 flex-shrink-0">
         <h3 class="text-base font-semibold text-slate-900">新建 API Key</h3>
         <button class="text-slate-400 hover:text-slate-600 transition-colors" data-close="keyModalMask"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <div class="px-6 py-5">
-        <p class="text-xs text-slate-500 mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg"><i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1.5"></i>Key 创建后仅展示一次明文，请立即复制保存。</p>
-        <div class="mb-4">
+      <div class="overflow-y-auto flex-1 px-6 py-5 space-y-4">
+        <!-- PRD §3.3：红色一次性警告 -->
+        <div class="p-3 bg-red-50 border border-red-300 rounded-lg">
+          <p class="text-xs font-medium text-red-700"><i class="fa-solid fa-triangle-exclamation mr-1.5"></i>此 Key 仅显示一次，关闭后无法再次查看，请立即保存到安全位置。</p>
+        </div>
+        <!-- 基础信息 -->
+        <div>
           <label class="block text-sm font-medium text-slate-700 mb-1.5">Key 名称 <span class="text-red-500">*</span></label>
           <input id="keyName" placeholder="例如：prod-gateway-v2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" />
           <p class="text-xs text-red-600 mt-1 min-h-[16px]" id="keyNameErr"></p>
         </div>
-        <div class="mb-4">
+        <div>
           <label class="block text-sm font-medium text-slate-700 mb-1.5">所属项目 <span class="text-red-500">*</span></label>
           <select id="keyProject" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
             <option value="">请选择</option><option>core-api</option><option>sre-tools</option><option>qa-sandbox</option>
           </select>
           <p class="text-xs text-red-600 mt-1 min-h-[16px]" id="keyProjectErr"></p>
         </div>
-        <div class="mb-4">
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">权限范围 <span class="text-red-500">*</span></label>
-          <div class="flex gap-5 mt-1">
-            <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" name="scope" value="chat" class="rounded border-slate-300" /> chat</label>
-            <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" name="scope" value="embedding" class="rounded border-slate-300" /> embedding</label>
-            <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" name="scope" value="image" class="rounded border-slate-300" /> image</label>
+
+        <!-- PRD §3.4：三层 Scope 树形选择 -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-2">权限 Scope <span class="text-red-500">*</span></label>
+          <div class="border border-slate-200 rounded-lg divide-y divide-slate-100 text-xs">
+            <!-- 第一级：模型访问范围 -->
+            <div class="px-3 py-2.5">
+              <p class="font-semibold text-slate-600 mb-2"><i class="fa-solid fa-layer-group mr-1.5 text-slate-400"></i>第一级：模型访问范围</p>
+              <div class="space-y-1.5 ml-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="scopeModel" value="model:all" class="border-slate-300" />
+                  <span class="font-mono text-slate-700">model:all</span>
+                  <span class="text-slate-400">· 租户下所有已激活模型</span>
+                  <span class="ml-auto px-1.5 py-0.5 rounded text-[10px] bg-amber-50 text-amber-700 font-medium">需 ADMIN</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="scopeModel" value="model:project" checked class="border-slate-300" />
+                  <span class="font-mono text-slate-700">model:project</span>
+                  <span class="text-slate-400">· 仅绑定项目允许的模型列表</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="scopeModel" value="model:list" class="border-slate-300" />
+                  <span class="font-mono text-slate-700">model:list:[ids]</span>
+                  <span class="text-slate-400">· 精确指定一组模型 ID</span>
+                </label>
+              </div>
+            </div>
+            <!-- 第二级：API 能力范围 -->
+            <div class="px-3 py-2.5">
+              <p class="font-semibold text-slate-600 mb-2"><i class="fa-solid fa-plug mr-1.5 text-slate-400"></i>第二级：API 能力范围</p>
+              <div class="grid grid-cols-2 gap-1.5 ml-4">
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="scopeChat" checked class="rounded border-slate-300" /><span class="font-mono text-slate-700">chat:completions</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="scopeEmbed" class="rounded border-slate-300" /><span class="font-mono text-slate-700">embeddings</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="scopeImages" class="rounded border-slate-300" /><span class="font-mono text-slate-700">images</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="scopeAudio" class="rounded border-slate-300" /><span class="font-mono text-slate-700">audio</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="scopeFiles" class="rounded border-slate-300" /><span class="font-mono text-slate-700">files</span></label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="scopeFinetune" class="rounded border-slate-300" onchange="document.getElementById('scopeFinetuneWarn').classList.toggle('hidden',!this.checked)" />
+                  <span class="font-mono text-slate-700">finetuning</span>
+                  <span class="text-amber-600 text-[10px]">高风险</span>
+                </label>
+              </div>
+              <p id="scopeFinetuneWarn" class="hidden mt-1.5 ml-4 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i>finetuning 权限需 ADMIN 审批后才能启用</p>
+            </div>
+            <!-- 第三级：数据权限 -->
+            <div class="px-3 py-2.5">
+              <p class="font-semibold text-slate-600 mb-2"><i class="fa-solid fa-database mr-1.5 text-slate-400"></i>第三级：数据权限（只读）</p>
+              <div class="space-y-1.5 ml-4">
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="scopeTraceSelf" checked class="rounded border-slate-300" /><span class="font-mono text-slate-700">trace:read:self</span><span class="text-slate-400 ml-1">· 读取本 Key 产生的 Trace</span></label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" id="scopeTraceProject" class="rounded border-slate-300" />
+                  <span class="font-mono text-slate-700">trace:read:project</span>
+                  <span class="text-slate-400 ml-1">· 读取项目全部 Trace</span>
+                  <span class="ml-auto px-1.5 py-0.5 rounded text-[10px] bg-amber-50 text-amber-700 font-medium">需 PROJECT_ADMIN</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="scopeUsage" class="rounded border-slate-300" /><span class="font-mono text-slate-700">usage:read</span><span class="text-slate-400 ml-1">· 读取用量统计 API</span></label>
+              </div>
+            </div>
           </div>
           <p class="text-xs text-red-600 mt-1 min-h-[16px]" id="keyScopeErr"></p>
         </div>
+
+        <!-- IP 白名单（PRD §3.3） -->
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-1.5">过期时间（可选）</label>
-          <input id="keyExpire" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">IP 白名单 <span class="text-slate-400 font-normal text-xs">（可选，支持 CIDR）</span></label>
+          <textarea id="keyIpWhitelist" rows="2" placeholder="每行一条，例如：&#10;192.168.1.0/24&#10;10.0.0.1" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+          <p class="text-xs text-slate-400 mt-1">留空则不限制来源 IP；生产 Key 强烈建议配置</p>
         </div>
-        <div>
-          <div class="flex items-center gap-2 mb-1.5">
-            <label class="block text-sm font-medium text-slate-700">限流配置（④ Key 级 · 链路 A）</label>
-            <span class="text-xs text-slate-400">可选</span>
+
+        <!-- 过期时间 + 限流 -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1.5">过期时间（可选）</label>
+            <input id="keyExpire" type="date" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">RPM 上限</label>
-              <input id="keyRpm" type="number" placeholder="500（留空则继承项目级）" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">TPM 上限</label>
-              <input id="keyTpm" type="number" placeholder="100000（留空则继承项目级）" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
+          <div></div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">RPM 上限（可选）</label>
+            <input id="keyRpm" type="number" placeholder="继承项目级" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
-          <p class="text-xs text-slate-400 mt-1.5">Key 级限流必须 ≤ 项目级限流；单个 Key 触限不影响同项目其他 Key。</p>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">TPM 上限（可选）</label>
+            <input id="keyTpm" type="number" placeholder="继承项目级" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
         </div>
+        <p class="text-xs text-slate-400">Key 级限流必须 ≤ 项目级限流；单个 Key 触限不影响同项目其他 Key。</p>
       </div>
-      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl flex-shrink-0">
         <button class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-close="keyModalMask">取消</button>
-        <button id="keyFormSubmit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">创建</button>
+        <button id="keyFormSubmit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">创建 Key</button>
       </div>
     </div>
   </div>
@@ -3154,14 +3807,37 @@
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">权限范围（scope）<span class="text-red-500">*</span></label>
-          <div class="flex flex-wrap gap-3">
-            <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" id="editScopeChat" checked class="rounded border-slate-300" /><span>Chat 对话</span></label>
-            <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" id="editScopeEmbed" class="rounded border-slate-300" /><span>Embedding 向量化</span></label>
-            <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" id="editScopeAudio" class="rounded border-slate-300" /><span>Audio 语音</span></label>
-            <label class="flex items-center gap-2 text-sm text-slate-600 cursor-pointer"><input type="checkbox" id="editScopeImage" class="rounded border-slate-300" /><span>Image 图像</span></label>
+          <label class="block text-sm font-medium text-slate-700 mb-2">权限 Scope <span class="text-red-500">*</span></label>
+          <!-- PRD §3.4 三层 Scope 树形（编辑视图） -->
+          <div class="border border-slate-200 rounded-lg divide-y divide-slate-100 text-xs">
+            <div class="px-3 py-2.5">
+              <p class="font-semibold text-slate-600 mb-2"><i class="fa-solid fa-layer-group mr-1.5 text-slate-400"></i>第一级：模型访问范围</p>
+              <div class="space-y-1.5 ml-4">
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="editScopeModel" value="model:all" class="border-slate-300" /><span class="font-mono text-slate-700">model:all</span><span class="text-slate-400 ml-1">· 所有模型</span><span class="ml-auto px-1.5 py-0.5 rounded text-[10px] bg-amber-50 text-amber-700">需 ADMIN</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="editScopeModel" value="model:project" checked class="border-slate-300" /><span class="font-mono text-slate-700">model:project</span><span class="text-slate-400 ml-1">· 绑定项目允许模型</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="radio" name="editScopeModel" value="model:list" class="border-slate-300" /><span class="font-mono text-slate-700">model:list:[ids]</span><span class="text-slate-400 ml-1">· 精确指定模型 ID</span></label>
+              </div>
+            </div>
+            <div class="px-3 py-2.5">
+              <p class="font-semibold text-slate-600 mb-2"><i class="fa-solid fa-plug mr-1.5 text-slate-400"></i>第二级：API 能力范围</p>
+              <div class="grid grid-cols-2 gap-1.5 ml-4">
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editScopeChat" checked class="rounded border-slate-300" /><span class="font-mono text-slate-700">chat:completions</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editScopeEmbed" class="rounded border-slate-300" /><span class="font-mono text-slate-700">embeddings</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editScopeAudio" class="rounded border-slate-300" /><span class="font-mono text-slate-700">audio</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editScopeImage" class="rounded border-slate-300" /><span class="font-mono text-slate-700">images</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editScopeFilesChk" class="rounded border-slate-300" /><span class="font-mono text-slate-700">files</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editScopeFinetune" class="rounded border-slate-300" /><span class="font-mono text-slate-700">finetuning</span><span class="text-amber-600 ml-1 text-[10px]">高风险</span></label>
+              </div>
+            </div>
+            <div class="px-3 py-2.5">
+              <p class="font-semibold text-slate-600 mb-2"><i class="fa-solid fa-database mr-1.5 text-slate-400"></i>第三级：数据权限</p>
+              <div class="space-y-1.5 ml-4">
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editScopeTraceSelf" checked class="rounded border-slate-300" /><span class="font-mono text-slate-700">trace:read:self</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editScopeTraceProject" class="rounded border-slate-300" /><span class="font-mono text-slate-700">trace:read:project</span><span class="ml-auto px-1.5 py-0.5 rounded text-[10px] bg-amber-50 text-amber-700">需 PROJECT_ADMIN</span></label>
+                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="editScopeUsage" class="rounded border-slate-300" /><span class="font-mono text-slate-700">usage:read</span></label>
+              </div>
+            </div>
           </div>
-          <p class="text-xs text-slate-400 mt-2">当前 Key 至少需选 1 个权限范围</p>
           <p class="text-xs text-red-600 mt-1 min-h-[16px]" id="editKeyScopeErr"></p>
         </div>
       </div>
@@ -3395,16 +4071,50 @@ print(response.choices[0].message.content)</code></pre>
 
   <script>
     // 导航
-    const navTitles = { login:'登录 / 注册', dashboard:'概览', apikey:'API Keys', models:'模型广场', projects:'项目管理', billing:'用量与账单', alerts:'告警设置', contract:'合同管理', playground:'Playground', finetune:'精调中心', monitoring:'监控告警', traces:'Trace 调用明细', team:'团队与成员', 'prompt-lab':'Prompt 实验室', evaluation:'评测中心', policy:'策略中心', compliance:'合规策略', 'cost-optimization':'成本优化', 'approval-center':'审批中心' };
-    document.querySelectorAll('.nav-item[data-target]').forEach(btn => {
+    const navTitles = { login:'登录 / 注册', dashboard:'仪表板', apikey:'API Keys · 个人', 'proj-apikeys':'API Keys · 项目', models:'模型广场 · 全部模型', 'models-compare':'模型广场 · 模型对比', projects:'项目管理 · 项目列表', 'proj-envmgmt':'项目管理 · 环境管理', billing:'成本优化中心 · 成本仪表板', alerts:'告警与合同 · 告警规则', 'alert-channels':'告警与合同 · 通知渠道', contract:'告警与合同 · 合同查看', playground:'Prompt实验室 · Playground', finetune:'精调中心', monitoring:'监控告警', traces:'Trace 调用明细', 'traces-anomaly':'Trace · 异常聚类', team:'团队与成员 · 成员列表', 'team-sso':'团队与成员 · SSO 配置', 'prompt-lab':'Prompt 实验室', evaluation:'Prompt实验室 · 评测任务', policy:'路由策略 · 策略列表', 'policy-simulate':'路由策略 · 策略仿真', 'policy-versions':'路由策略 · 版本历史', compliance:'合规策略 · 策略列表', 'compliance-guardrails':'合规策略 · 内容安全', 'compliance-reports':'合规策略 · 合规报告', 'cost-optimization':'成本优化中心 · 优化建议', 'cost-budget':'成本优化中心 · 预算管理', 'approval-center':'审批中心' };
+
+    // 导航切换函数
+    function navigate(target) {
+      document.querySelectorAll('.nav-sub-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      const btn = document.querySelector(`.nav-sub-item[data-target="${target}"]`);
+      if (btn) btn.classList.add('active');
+      const sec = document.getElementById(target);
+      if (sec) sec.classList.add('active');
+      document.getElementById('headerTitle').textContent = navTitles[target] || target;
+      // 切换到项目管理时重置为列表视图
+      if (target === 'projects') {
+        const lv = document.getElementById('proj-list-view');
+        const dv = document.getElementById('proj-detail-view');
+        const av = document.getElementById('proj-apikey-view');
+        if (lv) lv.classList.remove('hidden');
+        if (dv) dv.classList.add('hidden');
+        if (av) av.classList.add('hidden');
+      }
+    }
+
+    // 子菜单导航绑定
+    document.querySelectorAll('.nav-sub-item[data-target]').forEach(btn => {
       btn.addEventListener('click', () => {
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        btn.classList.add('active');
-        const t = btn.dataset.target;
-        document.getElementById(t).classList.add('active');
-        document.getElementById('headerTitle').textContent = navTitles[t] || t;
+        navigate(btn.dataset.target);
+        // 如有 data-subtab，额外跳转到项目 API Keys 视图
+        if (btn.dataset.subtab === 'proj-apikeys') {
+          const lv = document.getElementById('proj-list-view');
+          const av = document.getElementById('proj-apikey-view');
+          const dv = document.getElementById('proj-detail-view');
+          if (lv) lv.classList.add('hidden');
+          if (dv) dv.classList.add('hidden');
+          if (av) { av.classList.remove('hidden'); document.getElementById('headerTitle').textContent = 'API Keys · 项目'; }
+        }
       });
+    });
+
+    // 顶层仪表板按钮绑定（单独绑定，不属于 sub-item）
+    document.querySelector('.nav-item[data-target="dashboard"]')?.addEventListener('click', () => {
+      document.querySelectorAll('.nav-sub-item').forEach(n => n.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.getElementById('dashboard').classList.add('active');
+      document.getElementById('headerTitle').textContent = '仪表板';
     });
     document.querySelector('.nav-item[data-target="dashboard"]').click();
 
@@ -3460,9 +4170,67 @@ print(response.choices[0].message.content)</code></pre>
     });
     function setErr(id, msg) { document.getElementById(id).textContent = msg || ''; }
     function openModal(id) { document.getElementById(id).classList.add('show'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-    document.querySelectorAll('[data-close]').forEach(btn => btn.addEventListener('click', () => closeModal(btn.dataset.close)));
-    document.querySelectorAll('.modal-mask').forEach(mask => mask.addEventListener('click', e => { if (e.target === mask) closeModal(mask.id); }));
+
+    // 侧边栏分组折叠/展开
+    function toggleNavGroup(groupId, btn) {
+      const sub = document.getElementById(groupId);
+      if (!sub) return;
+      const chevron = btn.querySelector('.nav-chevron');
+      const isOpen = sub.classList.contains('open');
+      sub.classList.toggle('open', !isOpen);
+      if (chevron) chevron.classList.toggle('open', !isOpen);
+    }
+
+    // 路由策略仿真
+    function runPolicySim() {
+      const panel = document.getElementById('simResultPanel');
+      if (!panel) return;
+      panel.classList.remove('hidden');
+      panel.innerHTML = `<h2 class="text-sm font-semibold text-slate-800 mb-4">仿真结果</h2>
+        <div class="space-y-3 text-sm">
+          <div class="flex items-start gap-3 p-3 bg-blue-50 rounded-lg"><i class="fa-solid fa-route text-blue-600 mt-0.5"></i><div><p class="font-medium text-blue-800">匹配路由：主力提供商 gpt-4o（权重 70%）</p><p class="text-xs text-blue-600 mt-1">依据：tag=premium 命中 Tier-1 策略，用量未超限</p></div></div>
+          <div class="flex items-start gap-3 p-3 bg-slate-50 rounded-lg"><i class="fa-solid fa-list-ul text-slate-400 mt-0.5"></i><div><p class="font-medium text-slate-700">备用链路（Fallback）</p><p class="text-xs text-slate-500 mt-1">1. deepseek-v3（权重 20%）→ 2. claude-3-5-sonnet（权重 10%）</p></div></div>
+          <div class="flex items-start gap-3 p-3 bg-green-50 rounded-lg"><i class="fa-solid fa-circle-check text-green-600 mt-0.5"></i><div><p class="font-medium text-green-800">预估费用：¥0.0028 / 次</p><p class="text-xs text-green-600 mt-1">在预算阈值以内，无审批触发</p></div></div>
+        </div>`;
+      showToast('策略仿真完成');
+    }
+
+    // 环境晋级确认
+    function openEnvPromoteModal(from, to) {
+      const needApproval = (to === 'prod');
+      showConfirm('确认晋级环境',
+        `将 <strong>${from}</strong> 配置晋级至 <strong>${to}</strong>。` +
+        (needApproval ? ' <br><span class="text-amber-600 font-medium">⚠ 晋级至生产环境需要 Tenant Admin 审批</span>' : ''),
+        () => showToast(needApproval ? '晋级申请已提交，等待审批' : '晋级成功')
+      );
+    }
+
+    function onChannelTypeChange(type) {
+      const webhookRow = document.getElementById('channelWebhookRow');
+      const emailRow = document.getElementById('channelEmailRow');
+      if (!webhookRow || !emailRow) return;
+      if (type === 'email') {
+        webhookRow.classList.add('hidden');
+        emailRow.classList.remove('hidden');
+      } else {
+        webhookRow.classList.remove('hidden');
+        emailRow.classList.add('hidden');
+      }
+    }
+
+    function closeModal(id) { document.getElementById(id)?.classList.remove('show'); }
+    // 事件委托：兼容脚本之后插入的 modal 节点
+    document.addEventListener('click', (e) => {
+      const closeBtn = e.target.closest('[data-close]');
+      if (closeBtn) {
+        closeModal(closeBtn.dataset.close);
+        return;
+      }
+      const mask = e.target.closest('.modal-mask');
+      if (mask && e.target === mask) {
+        closeModal(mask.id);
+      }
+    });
 
     // 合同列表：展开/收起详情行
     function toggleContractDetail(tr) {
@@ -4245,9 +5013,10 @@ print(response.choices[0].message.content)</code></pre>
       openModal('editKeyModalMask');
     }
     document.getElementById('editKeySaveBtn').addEventListener('click', () => {
-      const scopes = ['editScopeChat','editScopeEmbed','editScopeAudio','editScopeImage'].filter(id => document.getElementById(id).checked);
-      setErr('editKeyScopeErr', scopes.length > 0 ? '' : '至少需选择 1 个权限范围');
-      if (scopes.length > 0) {
+      const scopes = ['editScopeChat','editScopeEmbed','editScopeAudio','editScopeImage','editScopeFilesChk','editScopeFinetune','editScopeTraceSelf','editScopeTraceProject','editScopeUsage'].filter(id => document.getElementById(id)?.checked);
+      const apiScopes = ['editScopeChat','editScopeEmbed','editScopeAudio','editScopeImage','editScopeFilesChk','editScopeFinetune'].filter(id => document.getElementById(id)?.checked);
+      setErr('editKeyScopeErr', apiScopes.length > 0 ? '' : '至少需选择 1 个 API 能力范围（第二级）');
+      if (apiScopes.length > 0) {
         closeModal('editKeyModalMask');
         showToast('API Key 已更新');
       }
@@ -4272,25 +5041,7 @@ print(response.choices[0].message.content)</code></pre>
       }
     });
 
-    // 导航辅助（用于快捷入口按钮）
-    function navigate(target) {
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      const btn = document.querySelector(`.nav-item[data-target="${target}"]`);
-      if (btn) btn.classList.add('active');
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      const sec = document.getElementById(target);
-      if (sec) sec.classList.add('active');
-      if (btn) document.getElementById('headerTitle').textContent = btn.querySelector('.sidebar-text')?.textContent.trim() || target;
-      // 切换到项目管理时重置为列表视图
-      if (target === 'projects') {
-        const lv = document.getElementById('proj-list-view');
-        const dv = document.getElementById('proj-detail-view');
-        const av = document.getElementById('proj-apikey-view');
-        if (lv) lv.classList.remove('hidden');
-        if (dv) dv.classList.add('hidden');
-        if (av) av.classList.add('hidden');
-      }
-    }
+    // (navigate() 已在顶部导航区定义，此处保留空注释以维持行结构)
 
     function openProjectSettings(name, env) {
       document.getElementById('projDetailName').textContent = name;
@@ -4363,9 +5114,10 @@ print(response.choices[0].message.content)</code></pre>
               </span>
             </td>
             <td class="px-5 py-3 text-right">
-              <div class="flex items-center justify-end gap-3">
-                <button class="text-xs text-slate-400 hover:text-slate-600 transition-colors" onclick="showToast('已${k.status === 'active' ? '禁用' : '启用'} ${k.name}')">${k.status === 'active' ? '禁用' : '启用'}</button>
-                <button class="text-xs text-red-400 hover:text-red-600 transition-colors" onclick="showConfirm('撤销 Key：${k.name}','撤销后该 Key 立即失效，调用将返回 401。此操作不可撤销。',()=>showToast('Key 已撤销'))">撤销</button>
+              <div class="flex items-center justify-end gap-2">
+                <button class="text-xs text-blue-500 hover:text-blue-700 transition-colors" onclick="openRotateModal('${k.name}','sk-proj-')"><i class="fa-solid fa-rotate mr-1"></i>轮转</button>
+                <button class="text-xs text-slate-400 hover:text-slate-600 transition-colors" onclick="openEditKeyModal('${k.name}')">${k.status === 'active' ? '编辑' : '启用'}</button>
+                <button class="text-xs text-red-500 hover:text-red-700 font-medium transition-colors" onclick="openRevokeModal('${k.name}','sk-proj-')"><i class="fa-solid fa-ban mr-1"></i>紧急撤销</button>
               </div>
             </td>
           </tr>`).join('');
@@ -5318,6 +6070,97 @@ print(response.choices[0].message.content)</code></pre>
       <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition-colors" onclick="sendCopilot()">发送</button>
     </div>
   </div>
+  <!-- 弹窗：API Key 轮转（PRD §3.5） -->
+  <div class="modal-mask fixed inset-0 bg-black/40 items-center justify-center z-50" id="keyRotateMask">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <div>
+          <h3 class="text-base font-semibold text-slate-900"><i class="fa-solid fa-rotate text-blue-500 mr-2"></i>开始 Key 轮转</h3>
+          <p class="text-xs text-slate-400 mt-0.5 font-mono" id="rotateKeyLabel">—</p>
+        </div>
+        <button class="text-slate-400 hover:text-slate-600" data-close="keyRotateMask"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <!-- 说明 -->
+        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg text-xs text-blue-800 space-y-1">
+          <p><i class="fa-solid fa-circle-info mr-1.5"></i>轮转期间，旧 Key 与新 Key <strong>同时有效</strong>，不会中断业务。</p>
+          <p>新 Key 与旧 Key 的权限 Scope、IP 白名单、速率限制完全相同。</p>
+        </div>
+        <!-- 并存期配置 -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">双 Key 并存期 <span class="text-red-500">*</span></label>
+          <select id="rotatePeriod" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option value="1h">1 小时</option>
+            <option value="6h">6 小时</option>
+            <option value="24h" selected>24 小时（推荐）</option>
+            <option value="3d">3 天</option>
+            <option value="7d">7 天（最大）</option>
+          </select>
+          <p class="text-xs text-slate-400 mt-1">并存期结束后旧 Key <strong>自动失效</strong>；也可在并存期内手动"立即完成轮转"。</p>
+        </div>
+        <!-- 预览 -->
+        <div class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 text-xs space-y-2">
+          <p class="font-semibold text-slate-700 mb-2">轮转后效果预览</p>
+          <div class="flex items-center gap-3">
+            <div class="flex-1 border border-amber-200 bg-amber-50 rounded px-3 py-2 text-center">
+              <p class="font-medium text-amber-700" id="rotateOldPrefix">旧 Key</p>
+              <p class="text-amber-600 mt-0.5 text-[10px]">轮转中 · 并存期后自动失效</p>
+            </div>
+            <i class="fa-solid fa-arrow-right text-slate-300 flex-shrink-0"></i>
+            <div class="flex-1 border border-green-200 bg-green-50 rounded px-3 py-2 text-center">
+              <p class="font-medium text-green-700">新 Key（即将生成）</p>
+              <p class="text-green-600 mt-0.5 text-[10px]">权限与旧 Key 完全相同</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
+        <button class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-close="keyRotateMask">取消</button>
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors" onclick="closeModal('keyRotateMask');showToast('轮转已启动，新 Key 已生成，旧 Key 将在并存期结束后自动失效')"><i class="fa-solid fa-rotate mr-1.5"></i>开始轮转</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 弹窗：Key 泄露紧急撤销（PRD §3.6） -->
+  <div class="modal-mask fixed inset-0 bg-black/40 items-center justify-center z-50" id="keyRevokeMask">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-red-100 bg-red-50 rounded-t-xl">
+        <div>
+          <h3 class="text-base font-semibold text-red-800"><i class="fa-solid fa-triangle-exclamation text-red-600 mr-2"></i>紧急撤销 API Key</h3>
+          <p class="text-xs text-red-500 mt-0.5 font-mono" id="revokeKeyLabel">—</p>
+        </div>
+        <button class="text-red-300 hover:text-red-600" data-close="keyRevokeMask"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <!-- SLA 和副作用说明 -->
+        <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-800 space-y-1.5">
+          <p class="font-semibold"><i class="fa-solid fa-bolt mr-1"></i>目标：从触发到 Key 失效 ≤ 30 秒</p>
+          <p>· 撤销后该 Key <strong>立即写入 Redis 黑名单</strong>，所有网关节点 ≤ 5 秒内刷新缓存。</p>
+          <p>· 撤销后 Key 保留 90 天（status=revoked），历史 Trace 仍可查询。</p>
+          <p>· 系统将自动创建一条「<strong>安全事件</strong>」待办项，建议检查近 30 天调用记录。</p>
+          <p>· 通知邮件将发送至租户 Owner 和 Security Officer。</p>
+        </div>
+        <!-- 前缀确认输入（PRD §3.6 二次确认） -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1.5">
+            请输入 Key 前缀以确认撤销
+            <span class="text-xs text-slate-400 font-normal ml-1">（高风险操作，无法撤回）</span>
+          </label>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-xs text-slate-500">需输入：</span>
+            <code id="revokeKeyPrefixHint" class="text-xs font-mono bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-slate-700">sk-pers-</code>
+          </div>
+          <input id="revokeConfirmInput" type="text" placeholder="在此输入 Key 前缀..." class="w-full border-2 border-red-300 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500" oninput="checkRevokeInput()" />
+          <p class="text-xs text-red-600 mt-1 min-h-[16px]" id="revokeInputErr"></p>
+        </div>
+      </div>
+      <div class="flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
+        <button class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors" data-close="keyRevokeMask">取消，不撤销</button>
+        <button id="revokeConfirmBtn" disabled class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed" onclick="doRevokeKey()"><i class="fa-solid fa-ban mr-1.5"></i>立即撤销此 Key</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const copilotReplies = ['好的，我来为您生成 Python 接入代码：\n```python\nfrom openai import OpenAI\nclient = OpenAI(api_key="sk-...", base_url="https://api.maas.acme.com/v1")\n```','根据您最近 24h 的数据，gpt-4o 的 P99 延迟上涨了 30%，可能是上游限流导致，已触发自动切换到 claude-3-5-sonnet。','本月费用较上月上涨 40%，主要来自 gpt-4o 的 input tokens 增加。建议对长文档场景切换至 qwen-max 以节省约 60% 成本。','根据您的使用场景，推荐：客服场景→claude-3-haiku（低延迟低成本），代码生成→gpt-4o，长文档摘要→qwen-max。'];
     let copilotIdx = 0;
@@ -5336,6 +6179,191 @@ print(response.choices[0].message.content)</code></pre>
       addCopilotMsg(inp.value.trim());
       inp.value = '';
     }
+
+    // PRD §3.5：Key 轮转弹窗
+    function openRotateModal(keyName, keyPrefix) {
+      document.getElementById('rotateKeyLabel').textContent = keyName;
+      document.getElementById('rotateOldPrefix').textContent = keyPrefix || '旧 Key';
+      document.getElementById('rotatePeriod').value = '24h';
+      openModal('keyRotateMask');
+    }
+
+    // PRD §3.6：Key 紧急撤销弹窗
+    let _revokePrefix = '';
+    function openRevokeModal(keyName, keyPrefix) {
+      _revokePrefix = keyPrefix || '';
+      document.getElementById('revokeKeyLabel').textContent = keyName;
+      document.getElementById('revokeKeyPrefixHint').textContent = keyPrefix || '（前缀）';
+      document.getElementById('revokeConfirmInput').value = '';
+      document.getElementById('revokeInputErr').textContent = '';
+      document.getElementById('revokeConfirmBtn').disabled = true;
+      openModal('keyRevokeMask');
+    }
+    function checkRevokeInput() {
+      const val = document.getElementById('revokeConfirmInput').value;
+      const ok = val === _revokePrefix && _revokePrefix !== '';
+      document.getElementById('revokeConfirmBtn').disabled = !ok;
+      document.getElementById('revokeInputErr').textContent = val.length > 0 && !ok ? '前缀不匹配，请重新输入' : '';
+    }
+    function doRevokeKey() {
+      closeModal('keyRevokeMask');
+      // 模拟30秒SLA：立即展示"撤销中"toast，再展示"已撤销"
+      showToast('正在撤销… Key 正写入黑名单，预计 ≤ 30 秒生效');
+      setTimeout(() => {
+        showToast('✓ Key 已撤销，安全事件待办已创建，通知邮件已发送');
+      }, 2000);
+    }
   </script>
+
+  <!-- ===== 告警规则创建/编辑 Modal ===== -->
+  <div class="modal-mask fixed inset-0 bg-black/40 items-center justify-center z-50" id="modal-alert-rule">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h3 class="text-base font-semibold text-slate-900">新建告警规则</h3>
+        <button class="text-slate-400 hover:text-slate-600" data-close="modal-alert-rule"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <div><label class="block text-xs font-medium text-slate-700 mb-1.5">规则名称</label>
+          <input type="text" placeholder="如：P95延迟告警" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-xs font-medium text-slate-700 mb-1.5">监控指标</label>
+            <select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option value="p95_latency_ms">p95_latency_ms — P95 延迟</option>
+              <option value="request_error_rate">request_error_rate — 错误率</option>
+              <option value="monthly_cost">monthly_cost — 月度费用</option>
+              <option value="budget_usage_rate">budget_usage_rate — 预算使用率</option>
+              <option value="fallback_rate">fallback_rate — Fallback 率</option>
+              <option value="token_throughput">token_throughput — Token 吞吐</option>
+            </select>
+          </div>
+          <div><label class="block text-xs font-medium text-slate-700 mb-1.5">严重级别</label>
+            <select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option value="critical">critical — 紧急</option>
+              <option value="warning">warning — 警告</option>
+              <option value="info">info — 提示</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-4">
+          <div><label class="block text-xs font-medium text-slate-700 mb-1.5">条件算子</label>
+            <select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option>&gt;</option><option>&gt;=</option><option>&lt;</option><option>&lt;=</option>
+            </select>
+          </div>
+          <div><label class="block text-xs font-medium text-slate-700 mb-1.5">阈值</label>
+            <input type="number" placeholder="2000" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+          </div>
+          <div><label class="block text-xs font-medium text-slate-700 mb-1.5">时间窗口</label>
+            <select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              <option>1 分钟</option><option selected>5 分钟</option><option>15 分钟</option><option>1 小时</option><option>1 天</option>
+            </select>
+          </div>
+        </div>
+        <div><label class="block text-xs font-medium text-slate-700 mb-1.5">过滤维度（可选）</label>
+          <div class="grid grid-cols-2 gap-3">
+            <select class="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="">不限项目</option><option>core-api</option><option>crm-bot</option><option>dev-lab</option></select>
+            <select class="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"><option value="">不限模型</option><option>gpt-4o</option><option>claude-3-5-sonnet</option><option>deepseek-v3</option></select>
+          </div>
+        </div>
+        <div><label class="block text-xs font-medium text-slate-700 mb-1.5">通知渠道（最多 5 个）</label>
+          <div class="flex flex-wrap gap-2">
+            <label class="flex items-center gap-1.5 text-xs cursor-pointer"><input type="checkbox" checked class="rounded text-blue-600"> 飞书研发群</label>
+            <label class="flex items-center gap-1.5 text-xs cursor-pointer"><input type="checkbox" class="rounded text-blue-600"> 运维邮件组</label>
+            <label class="flex items-center gap-1.5 text-xs cursor-pointer"><input type="checkbox" class="rounded text-blue-600"> PagerDuty</label>
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+        <button class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg transition-colors" data-close="modal-alert-rule">取消</button>
+        <button class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors" onclick="closeModal('modal-alert-rule');showToast('告警规则已保存')">保存规则</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 新建 Guardrail 规则 Modal ===== -->
+  <div class="modal-mask fixed inset-0 bg-black/40 items-center justify-center z-50" id="modal-guardrail-add">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h3 class="text-base font-semibold text-slate-900">新建内容安全规则</h3>
+        <button class="text-slate-400 hover:text-slate-600" data-close="modal-guardrail-add"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <div><label class="block text-xs font-medium text-slate-700 mb-1.5">规则名称</label>
+          <input type="text" placeholder="如：pii_block_v2" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-xs font-medium text-slate-700 mb-1.5">方向</label>
+            <select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>input — 请求</option><option>output — 响应</option><option>both — 双向</option>
+            </select>
+          </div>
+          <div><label class="block text-xs font-medium text-slate-700 mb-1.5">规则类型</label>
+            <select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>keyword_block</option><option>pii_detection</option><option>topic_classifier</option><option>regex_filter</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div><label class="block text-xs font-medium text-slate-700 mb-1.5">触发动作</label>
+            <select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>block — 直接拦截</option><option>mask — 脱敏替换</option><option>warn — 仅告警</option>
+            </select>
+          </div>
+          <div><label class="block text-xs font-medium text-slate-700 mb-1.5">严重级别</label>
+            <select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option>high</option><option>medium</option><option>low</option>
+            </select>
+          </div>
+        </div>
+        <div><label class="block text-xs font-medium text-slate-700 mb-1.5">规则配置（JSON 或关键词列表）</label>
+          <textarea rows="3" placeholder='{"keywords": ["敏感词1", "敏感词2"]}' class="w-full border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+        <button class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg" data-close="modal-guardrail-add">取消</button>
+        <button class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg" onclick="closeModal('modal-guardrail-add');showToast('安全规则已创建')">创建规则</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 新增通知渠道 Modal ===== -->
+  <div class="modal-mask fixed inset-0 bg-black/40 items-center justify-center z-50" id="modal-add-channel">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h3 class="text-base font-semibold text-slate-900">添加通知渠道</h3>
+        <button class="text-slate-400 hover:text-slate-600" data-close="modal-add-channel"><i class="fa-solid fa-times"></i></button>
+      </div>
+      <div class="px-6 py-5 space-y-4">
+        <div><label class="block text-xs font-medium text-slate-700 mb-1.5">渠道类型</label>
+          <select id="channelTypeSelect" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500" onchange="onChannelTypeChange(this.value)">
+            <option value="feishu">飞书 Webhook</option>
+            <option value="email">邮件组</option>
+            <option value="pagerduty">PagerDuty</option>
+            <option value="slack">Slack</option>
+            <option value="dingtalk">钉钉 Webhook</option>
+          </select>
+        </div>
+        <div><label class="block text-xs font-medium text-slate-700 mb-1.5">渠道名称</label>
+          <input type="text" placeholder="如：研发飞书群" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div id="channelWebhookRow"><label class="block text-xs font-medium text-slate-700 mb-1.5">Webhook URL</label>
+          <input type="url" placeholder="https://open.feishu.cn/open-apis/bot/v2/hook/..." class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+        <div id="channelEmailRow" class="hidden"><label class="block text-xs font-medium text-slate-700 mb-1.5">邮件地址列表（逗号分隔）</label>
+          <textarea rows="2" placeholder="ops@example.com, dev@example.com" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="px-3 py-1.5 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50" onclick="showToast('测试消息已发送，请检查渠道')"><i class="fa-solid fa-paper-plane mr-1"></i>测试发送</button>
+          <span class="text-xs text-slate-400">保存前建议先测试连通性</span>
+        </div>
+      </div>
+      <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-2xl">
+        <button class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg" data-close="modal-add-channel">取消</button>
+        <button class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg" onclick="closeModal('modal-add-channel');showToast('通知渠道已添加')">保存</button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
+

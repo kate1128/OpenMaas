@@ -22,7 +22,8 @@
 8. [Trace数据保留策略](#第8章-trace数据保留策略)
 9. [告警规则配置](#第9章-告警规则配置)
 10. [Trace API与SDK集成](#第10章-trace-api与sdk集成)
-11. [验收标准](#第11章-验收标准)
+11. [Agent Trace 专节](#第11章-agent-trace-专节)
+12. [验收标准](#第12章-验收标准)
 
 ---
 
@@ -1355,7 +1356,173 @@ otel_export:
 
 ---
 
-## 附录B：错误码速查表
+## 第11章 Agent Trace 专节
+
+> **背景**：随着 Agent（智能体）应用在企业内快速落地，单次"请求-响应"的 Trace 模型已无法完整描述多步骤、工具调用、RAG 检索、多模型协作等复杂调用链路。本章定义 Agent 场景下的 Trace 扩展数据模型与视图规格，作为 GAP-28 的完整覆盖。
+
+---
+
+### 11.1 Agent Trace 的核心挑战
+
+普通 LLM 调用是一个单步 Span：`请求 → 路由 → 供应商调用 → 响应`。Agent 调用是一棵 **Span 树**，典型结构如下：
+
+```
+Agent Run (root span)
+├── Step 1: LLM 推理（选择工具）
+│   └── 供应商调用 Span
+├── Step 2: Tool Call - search_knowledge_base
+│   ├── RAG 检索 Span（向量数据库查询）
+│   └── 结果注入 Span
+├── Step 3: LLM 推理（基于检索结果生成答案）
+│   └── 供应商调用 Span
+└── Step 4: Tool Call - send_email（最终动作）
+    └── 外部 API 调用 Span
+```
+
+**挑战一**：每个 Agent Run 包含 N 次 LLM 调用，成本必须在 Run 维度聚合，同时保留每步 Token 明细。  
+**挑战二**：工具调用（Tool Call）不经过 MaaS 供应商层，但属于 Agent 执行链路，需要在 Trace 中记录工具名称、输入参数、执行耗时、输出摘要。  
+**挑战三**：RAG 检索步骤可能涉及 Embedding 模型调用（经过 MaaS）和向量库查询（不经过 MaaS），两类 Span 需要区分。  
+**挑战四**：多轮对话中，一个 Session 可能包含多个 Agent Run，需要在 Session 维度关联所有 Run。
+
+---
+
+### 11.2 Agent Trace 数据模型扩展
+
+在现有 `trace_span` 表基础上，新增以下字段支撑 Agent Trace：
+
+```sql
+-- 在 trace_span 表新增 Agent 相关字段
+ALTER TABLE trace_span ADD COLUMN IF NOT EXISTS
+    span_type           VARCHAR(32)   DEFAULT 'LLM_CALL',
+    -- 枚举值：LLM_CALL | TOOL_CALL | RAG_RETRIEVAL | EMBEDDING | AGENT_RUN | RERANK | EXTERNAL_API
+
+    agent_run_id        VARCHAR(128),  -- 所属 Agent Run 的根 Span ID
+    parent_span_id      VARCHAR(128),  -- 父 Span ID（支持多层嵌套）
+    step_index          INT,           -- 在当前 Agent Run 中的步骤序号（从 1 开始）
+    step_name           VARCHAR(256),  -- 人可读步骤名称，如 "检索知识库" / "生成回答"
+
+    -- Tool Call 专用字段（span_type = TOOL_CALL 时填充）
+    tool_name           VARCHAR(128),  -- 工具名称，如 "search_knowledge_base" / "send_email"
+    tool_input_hash     VARCHAR(64),   -- 工具输入参数的 SHA256 哈希（不存明文，防止敏感数据泄漏）
+    tool_output_size    INT,           -- 工具返回内容的字节数
+    tool_status         VARCHAR(32),   -- SUCCESS | FAILED | TIMEOUT | SKIPPED
+
+    -- RAG 专用字段（span_type = RAG_RETRIEVAL 时填充）
+    retrieval_query_hash VARCHAR(64),  -- 检索 Query 的哈希
+    retrieved_doc_count  INT,          -- 命中文档数量
+    retrieval_score_max  DECIMAL(5,4), -- 最高相似度分
+    retrieval_score_min  DECIMAL(5,4), -- 最低相似度分
+
+    -- Agent Run 聚合字段（span_type = AGENT_RUN 时填充，为根 Span）
+    total_llm_calls     INT,           -- 本次 Run 中 LLM_CALL 类型 Span 总数
+    total_tool_calls    INT,           -- 本次 Run 中 TOOL_CALL 类型 Span 总数
+    total_input_tokens  INT,           -- 本次 Run 所有 LLM 调用的 input token 合计
+    total_output_tokens INT,           -- 本次 Run 所有 LLM 调用的 output token 合计
+    total_cost_usd      DECIMAL(12,8), -- 本次 Run 所有 LLM 调用的成本合计
+    agent_status        VARCHAR(32),   -- COMPLETED | FAILED | INTERRUPTED | MAX_STEPS_EXCEEDED
+    max_steps_allowed   INT,           -- 配置的最大步骤数
+    actual_steps        INT;           -- 实际执行步骤数
+```
+
+---
+
+### 11.3 Agent Run 视图规格
+
+**页面入口**：Console → Trace 调用明细 → `D5E - Agent Run 视图`（新增导航项）
+
+**视图一：Agent Run 列表**
+
+| 字段 | 说明 |
+|------|------|
+| Run ID | 根 Span ID，可点击展开 |
+| 发起时间 | Agent Run 开始时间戳 |
+| 总耗时 | 从 Run 开始到结束的端到端时长 |
+| 总步骤数 | 实际执行步骤数 / 最大允许步骤数 |
+| LLM调用次数 | 本次 Run 中 LLM 调用总数 |
+| 总Token消耗 | input + output token 合计 |
+| 总成本 | 折算为人民币/美元，支持切换 |
+| 状态 | COMPLETED / FAILED / MAX_STEPS_EXCEEDED |
+| 关联 Session | 所属 Session ID（可跳转 Session 视图） |
+
+**视图二：Agent Run 瀑布图（Waterfall）**
+
+选中某个 Agent Run 后，展开为可视化瀑布图，规格如下：
+
+- 横轴：时间轴（ms）
+- 纵轴：Span 层级树（缩进展示父子关系）
+- 每个 Span 的颜色区分类型：
+  - 🔵 蓝色：`LLM_CALL`（LLM 推理）
+  - 🟢 绿色：`TOOL_CALL`（工具调用）
+  - 🟡 黄色：`RAG_RETRIEVAL`（知识库检索）
+  - 🟠 橙色：`EMBEDDING`（向量化）
+  - 🔴 红色：失败的 Span
+- 点击任意 Span 展开右侧详情面板，包含该 Span 的完整字段
+- 瀑布图支持导出为 PNG 或 JSON（供外部分析工具使用）
+
+**视图三：Agent Run 成本分解**
+
+在 Run 详情页底部展示成本饼图：
+- 按模型分解：每个逻辑模型的 Token 消耗和成本占比
+- 按步骤分解：每个步骤（step_index）的成本贡献
+- 提示信息：若存在 `total_tool_calls > 0`，标注"工具调用本身不计费，仅 LLM 推理步骤产生成本"
+
+---
+
+### 11.4 多轮对话中的 Agent Run 关联
+
+一个 Session（`session_id`）可以包含多个 Agent Run。Session 视图（第3章）在展示多轮对话时，需增加以下 Agent 感知：
+
+- **Session 时间线**：将 Agent Run 作为一个"事件块"展示，块内可展开查看步骤树
+- **Session 级聚合统计**：
+  - 总 Agent Run 数量
+  - 总 LLM 调用次数（包括 Agent 内嵌的调用）
+  - 总成本（会话维度）
+  - 平均每轮 Agent Run 步骤数
+
+---
+
+### 11.5 Agent Trace 的数据采集方式
+
+MaaS 平台侧可以自动捕获所有经过网关的 `LLM_CALL` 和 `EMBEDDING` 类型 Span。`TOOL_CALL` 和 `RAG_RETRIEVAL` 类型 Span 需要客户端主动上报，MaaS 提供以下两种方式：
+
+**方式一：Trace SDK 主动上报**
+```python
+# Python SDK 示例
+from maas import TraceClient
+
+trace = TraceClient(api_key="proj_xxx")
+
+with trace.agent_run(session_id="sess_123") as run:
+    with run.step("检索知识库", span_type="RAG_RETRIEVAL") as step:
+        results = vector_db.search(query)
+        step.set_retrieval_meta(doc_count=len(results), score_max=results[0].score)
+    
+    with run.step("LLM 生成答案", span_type="LLM_CALL") as step:
+        response = maas_client.chat(...)  # MaaS 会自动关联此 Span 到 run
+```
+
+**方式二：OpenTelemetry 兼容上报**  
+MaaS Trace 接收端兼容 OpenTelemetry OTLP 协议。客户端使用 OTel SDK 上报 Span 时，若 Span 包含 MaaS 定义的 `maas.span_type` Attribute，系统自动解析并关联到对应 Agent Run。
+
+> **隐私保护**：工具输入参数和检索 Query 均只存哈希值，原文不持久化（除非租户显式开启"Prompt内容留存"策略且通过合规审批）。
+
+---
+
+### 11.6 Agent Trace 验收标准
+
+| # | 验收项 | 验收口径 |
+|---|--------|---------|
+| AT-01 | Span 树完整性 | 一次包含 5 步骤（2次LLM + 2次Tool + 1次RAG）的 Agent Run，瀑布图展示 5 个 Span，父子关系正确，无缺失 |
+| AT-02 | 成本聚合准确 | Agent Run 根 Span 的 `total_cost_usd` = 所有 `LLM_CALL` 子 Span 的 `cost_usd` 之和，误差 < 0.01% |
+| AT-03 | Session 关联 | 同一 `session_id` 下的多个 Agent Run 在 Session 视图中正确聚合，总成本 = 各 Run 成本之和 |
+| AT-04 | 工具调用不计费 | `TOOL_CALL` 类型 Span 的 `cost_usd = 0`，不影响 billing_ledger 记录 |
+| AT-05 | SDK 上报延迟 | 客户端通过 Trace SDK 上报的 Span，在上报后 ≤ 5 秒内可在 Console 瀑布图中查询到 |
+| AT-06 | 瀑布图导出 | 点击"导出 JSON"后，下载文件包含完整 Span 树结构，可被 Jaeger / Zipkin 导入解析 |
+| AT-07 | MAX_STEPS 标记 | Agent 超过 `max_steps_allowed` 时，根 Span 状态标记为 `MAX_STEPS_EXCEEDED`，Console 显示橙色警告 |
+
+---
+
+## 第12章 验收标准
 
 | 错误码 | HTTP状态码 | 说明 | 建议处理 |
 |-------|-----------|------|---------|
