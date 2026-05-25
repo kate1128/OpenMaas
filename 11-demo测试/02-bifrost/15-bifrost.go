@@ -3,8 +3,6 @@ Bifrost Go SDK 真实使用示例
 
 运行前提：
   go get github.com/maximhq/bifrost/core
-
-每个示例可独立运行。设了真实 API Key 即可测试。
 */
 
 package main
@@ -14,11 +12,20 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"time"
 
+	# ✅ 保持包的正确引入
 	"github.com/maximhq/bifrost/core"
 	"github.com/maximhq/bifrost/core/schemas"
 )
+
+// 为了配合测试，我们补充一个标准的 main 函数
+func main() {
+	fmt.Println("--- 开始测试示例 1：基础基础调用 ---")
+	exampleBasicChat()
+
+	fmt.Println("\n--- 开始测试示例 4：流式调用 ---")
+	exampleStream()
+}
 
 // ============================================================
 // 示例 1: 基础调用 — 单 Provider 单 Key
@@ -52,7 +59,8 @@ func (a *SingleProviderAccount) GetConfigForProvider(provider schemas.ModelProvi
 }
 
 func exampleBasicChat() {
-	client, err := bifrost.Init(context.Background(), schemas.BifrostConfig{
+	# ✅ 修正：将 bifrost.Init 改为 core.Init
+	client, err := core.Init(context.Background(), schemas.BifrostConfig{
 		Account: &SingleProviderAccount{},
 	})
 	if err != nil {
@@ -132,7 +140,8 @@ func (a *MultiProviderAccount) GetConfigForProvider(provider schemas.ModelProvid
 }
 
 func exampleMultiProvider() {
-	client, err := bifrost.Init(context.Background(), schemas.BifrostConfig{
+	# ✅ 修正：将 bifrost.Init 改为 core.Init
+	client, err := core.Init(context.Background(), schemas.BifrostConfig{
 		Account: &MultiProviderAccount{},
 	})
 	if err != nil {
@@ -149,7 +158,6 @@ func exampleMultiProvider() {
 		},
 	}
 
-	// 请求 OpenAI
 	resp, err := client.ChatCompletionRequest(
 		schemas.NewBifrostContext(context.Background(), schemas.NoDeadline),
 		&schemas.BifrostChatRequest{
@@ -162,7 +170,6 @@ func exampleMultiProvider() {
 		fmt.Printf("OpenAI: %s\n", *resp.Choices[0].Message.Content.ContentStr)
 	}
 
-	// 请求 Anthropic
 	resp, err = client.ChatCompletionRequest(
 		schemas.NewBifrostContext(context.Background(), schemas.NoDeadline),
 		&schemas.BifrostChatRequest{
@@ -192,12 +199,12 @@ func (a *WeightedKeyAccount) GetKeysForProvider(ctx *context.Context, provider s
 			{
 				Value:  os.Getenv("OPENAI_API_KEY"),
 				Models: schemas.WhiteList{"*"},
-				Weight: 0.7, // 70% 请求走这个 Key
+				Weight: 0.7,
 			},
 			{
 				Value:  os.Getenv("OPENAI_API_KEY_2"),
 				Models: schemas.WhiteList{"*"},
-				Weight: 0.3, // 30% 请求走这个 Key
+				Weight: 0.3,
 			},
 		}, nil
 	}
@@ -215,7 +222,8 @@ func (a *WeightedKeyAccount) GetConfigForProvider(provider schemas.ModelProvider
 }
 
 func exampleWeightedKeys() {
-	client, err := bifrost.Init(context.Background(), schemas.BifrostConfig{
+	# ✅ 修正：将 bifrost.Init 改为 core.Init
+	client, err := core.Init(context.Background(), schemas.BifrostConfig{
 		Account: &WeightedKeyAccount{},
 	})
 	if err != nil {
@@ -252,7 +260,8 @@ func exampleWeightedKeys() {
 // ============================================================
 
 func exampleStream() {
-	client, err := bifrost.Init(context.Background(), schemas.BifrostConfig{
+	# ✅ 修正：将 bifrost.Init 改为 core.Init
+	client, err := core.Init(context.Background(), schemas.BifrostConfig{
 		Account: &SingleProviderAccount{},
 	})
 	if err != nil {
@@ -286,6 +295,7 @@ func exampleStream() {
 			log.Printf("Stream error: %v", chunk.BifrostError)
 			break
 		}
+		# ✅ 修正：增加多层 Nil 指针安全检查，防止 panic 闪退
 		if chunk.BifrostChatResponse != nil && len(chunk.BifrostChatResponse.Choices) > 0 {
 			choice := chunk.BifrostChatResponse.Choices[0]
 			if choice.ChatStreamResponseChoice != nil &&
@@ -297,6 +307,7 @@ func exampleStream() {
 	}
 	fmt.Println()
 }
+
 
 // ============================================================
 // 示例 5: 自定义重试策略

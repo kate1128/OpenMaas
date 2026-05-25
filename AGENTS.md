@@ -1,29 +1,103 @@
 # AGENTS.md — OpenMaas
 
-**Pure documentation repo.** No executable code, no build/test/lint/deploy tooling, no CI/CD.
+**OpenMaas** 是一个 MaaS（Model as a Service）平台的全套设计文档仓库，涵盖产品设计、竞品分析、架构设计、运维规划等全部阶段。本仓库**仅有文档**，不含可执行代码（除 `11-demo测试/` 中的测试脚本外）。
 
-## Structure
+> 所有文档均为**中文**编写。
 
-| Directory | Contents |
-|---|---|
-| `01-产品设计/` | Product design docs (PRD, user stories, req matrix, project plan, QA) |
-| `02-竞品分析/` | Competitive analysis — 28 products (cloud vendors, open-source gateways, observability platforms) |
-| `03-供应商分析/` | AI model supplier analysis (OpenAI, Anthropic, DeepSeek, Qwen, Llama, etc.) |
-| `04-原型设计/` | HTML prototypes (admin/console/docs/public) + design guidelines |
-| `05-开发设计/01-后端设计/` | Backend architecture: HLD, API spec, DB design, coding standards, 10 microservice designs |
-| `05-开发设计/02-前端设计/` | Frontend design for console, admin, docs site |
-| `06-产品运维/` | Operations: security, compliance, DR, runbook, capacity planning, deployment topology |
-| `07-中间件/` | Middleware selection deep-dives (11 services: PostgreSQL, Redis, Kafka, ClickHouse, Qdrant, MinIO, Prometheus+Grafana, OTel+Jaeger, Vector, Vault, Nginx) |
-| `08-源码走读/` | Code review of a LiteLLM fork (routero-develop) |
-| `09-cookbook/` | Developer docs, user manual, SDK guide, product docs |
+---
 
-## Tech Stack (documented target architecture)
+## 仓库性质
 
-Go 1.22+ / Python 3.11+, React 18+ + Ant Design Pro, K8s 1.28+, Istio optional. Middleware stack in `07-中间件/00-中间件选型总览.md`.
+| 属性 | 说明 |
+|------|------|
+| 类型 | 纯文档仓库 |
+| 代码 | 无生产代码，仅 `11-demo测试/` 下有 demo/测试脚本（Go + Python） |
+| CI/CD | 无（无 Makefile、package.json、GitHub Actions、Dockerfile） |
+| 构建 | 无 |
+| HTML 原型 | `04-原型设计/` 下有 4 个 `.html` 文件 |
+| 其他 | 均为 `.md` 文件 |
 
-## Notes
+---
 
-- All documentation is **Chinese**.
-- `.gitignore` is a Go template placeholder — no Go code actually exists in this repo.
-- The only non-markdown files are 4 HTML prototypes in `04-原型设计/`.
-- This repo documents system design only — no implementation is present.
+## 目录结构
+
+| 目录 | 内容 | 文件数 |
+|------|------|--------|
+| `01-产品设计/` | PRD（V1.0 + V2.0 两版）、需求分析、用户体验地图、项目计划、QA | ~20 |
+| `02-竞品分析/` | 28 家竞品分析（云厂商如阿里云百炼/AWS Bedrock/Azure AI，开源网关如 LiteLLM/One-API，观测平台如 Helicone/Portkey）+ 总览总结 | ~30 |
+| `03-供应商分析/` | AI 模型供应商分析（OpenAI、Anthropic、DeepSeek、Qwen、Llama、Google Gemini 等 10 家） | 11 |
+| `04-原型设计/` | HTML 原型（admin/console/docs/public）+ 设计线稿文档 | 7 |
+| `05-开发设计/01-后端设计/` | 后端架构：HLD、API 设计、DB 设计、编码规范、10 个微服务详细设计、SLA | ~24 |
+| `05-开发设计/02-前端设计/` | 前端详细设计（console / admin / docs 三端） | 3 |
+| `06-产品运维/` | 安全、合规、容灾、容量规划、部署拓扑、运维手册 | 6 |
+| `07-中间件/` | 中间件选型总览 + 12 个中间件深度文档（PG / Redis / Kafka / ClickHouse / Qdrant / MinIO / Prometheus+Grafana / OTel+Jaeger / Vector / Vault / Nginx / Istio） | 13 |
+| `08-源码走读/` | 开源项目源码分析（LiteLLM fork routero-develop、bifrost） | 3 |
+| `09-cookbook/` | 开发者文档、用户手册、SDK 指南、产品文档 | 5 |
+| `10-服务治理/` | 服务治理专题（注册发现、配置中心、限流熔断、链路追踪、灰度发布、服务网格） | 7 |
+| `11-demo测试/` | 测试脚本（litellm Python demo、bifrost Go demo），含 `.venv` 和 `go.mod` | 2 + 依赖 |
+
+---
+
+## 技术栈（文档规划的架构）
+
+| 层 | 技术 |
+|----|------|
+| 后端语言 | Go 1.22+ / Python 3.11+ |
+| 前端 | React 18+ + Ant Design Pro |
+| 容器编排 | K8s 1.28+，可选 Istio |
+| 中间件 | 详见 `07-中间件/00-中间件选型总览.md` |
+
+---
+
+## 关键文件速查
+
+| 用途 | 路径 |
+|------|------|
+| 产品全景 PRD | `01-产品设计/MaaS-PRD-V2.0/00-总纲与导航.md` |
+| 竞品总结 | `02-竞品分析/28-25家竞品能力全景总结与MaaS差距分析.md` |
+| 供应商概览 | `03-供应商分析/00-供应商概览.md` |
+| 后端 HLD | `05-开发设计/01-后端设计/系统设计文档(HLD).md` |
+| 微服务清单 | `05-开发设计/01-后端设计/微服务设计/00-微服务设计审核报告(V2.0).md` |
+| API 设计 | `05-开发设计/01-后端设计/API接口设计文档.md` |
+| DB 设计 | `05-开发设计/01-后端设计/数据库设计文档.md` |
+| 中间件总览 | `07-中间件/00-中间件选型总览.md` |
+| 部署拓扑 | `06-产品运维/部署拓扑文档.md` |
+| 服务治理总览 | `10-服务治理/00-服务治理总览.md` |
+| 架构全景图 | `05-开发设计/01-后端设计/架构全景图.md` |
+| CLI 配置 | `.claude/settings.local.json` |
+
+---
+
+## AI Agent 工作指南
+
+### 1. 文档规范
+
+- 所有文档使用**中文**撰写
+- 遵循 Markdown 格式，代码块标注语言（`yaml`、`json`、`go`、`python`、`nginx` 等）
+- 文档头部标注版本号和更新日期
+
+### 2. 跨文档引用
+
+- 中间件文档索引在 `07-中间件/00-中间件选型总览.md` 中维护
+- 微服务设计文档索引在 `05-开发设计/01-后端设计/微服务设计/00-微服务设计审核报告(V2.0).md` 中维护
+- 添加新文档时务必更新对应的索引文件
+
+### 3. 文件操作约束
+
+- **不修改** `.gitignore`（Go 模板占位，与本仓库无关）
+- **不删除** `CLAUDE.md`（另一个 AI 配置文件，与 AGENTS.md 互补）
+- **不添加** 可执行代码到文档目录
+- **不添加** CI/CD 配置
+
+### 4. 常见任务
+
+| 任务 | 参考位置 |
+|------|---------|
+| 新增中间件文档 | 参照 `07-中间件/` 下现有文档格式，更新 `00-中间件选型总览.md` 的矩阵和索引 |
+| 新增微服务设计 | 参照 `05-开发设计/01-后端设计/微车服务设计/` 下现有设计，更新目录索引 |
+| 补充竞品分析 | 参照 `02-竞品分析/` 下现有模板，更新 `00-竞品分析总览.md` |
+
+### 5. 版本备注
+
+- 当前最新 PRD 版本：V2.0（`01-产品设计/MaaS-PRD-V2.0/`）
+- V1.0 仍保留在 `01-产品设计/MaaS-PRD-V1.0/` 作为历史参考
