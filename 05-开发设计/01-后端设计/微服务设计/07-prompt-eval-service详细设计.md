@@ -192,6 +192,55 @@ sequenceDiagram
 
 ---
 
+## 4.1 LLM-as-Judge 多裁判一致性校验
+
+### 4.1.1 多裁判评分机制
+
+```
+设计目标：消除单裁判模型的偏差和随机波动，提高评测结果的可靠性。
+
+评分流程：
+  1. 对每个评测样本，使用 N 个不同的 Judge 模型评分（默认 N=3）
+     - Judge 池：gpt-4o, claude-3-5-sonnet, glm-4-plus（可配置）
+  2. 每个 Judge 输出 1~10 分的质量评分 + 评分理由
+  3. 计算一致性指标：
+     - 四分位距（IQR）：去除最高和最低分后的中间范围
+     - Cohen's Kappa：两两 Judge 之间的一致性
+     - 平均绝对偏差（MAD）：所有 Judge 评分与中位数的平均偏差
+```
+
+### 4.1.2 一致性判定与处理
+
+```
+一致性判定规则：
+  1. Cohen's Kappa (所有 Judge 对) > 0.6 → 高度一致
+     最终评分 = 所有 Judge 评分的均值
+
+  2. 0.4 ≤ Kappa ≤ 0.6 → 中等一致
+     最终评分 = 去除最高最低分后的均值（修剪均值）
+     标记 result.confidence = medium
+
+  3. Kappa < 0.4 → 低一致性
+     追加第 4 个 Judge（从 Judge 池中选取与前 3 个不同的模型）
+     若仍 < 0.4，则标记 result.confidence = low 并交付人工审核
+     人工审核后更新评测结果
+
+Judge 模型质量监控：
+  - 定期（每周）用黄金标准评测集评估 Judge 模型自身的准确率
+  - 准确率下降 > 5% 时触发告警并自动从 Judge 池中移除
+```
+
+### 4.1.3 eval_job 表扩展字段
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `judge_model_ids` | JSON | 实际使用的 Judge 模型列表 |
+| `judge_kappa` | DECIMAL(4,3) | 总体 Cohen's Kappa |
+| `judge_confidence` | ENUM | high / medium / low |
+| `requires_human_review` | BOOLEAN | 是否需要人工审核 |
+
+---
+
 ## 5. 质量门禁（Quality Gate）规则示例
 
 ```json

@@ -202,6 +202,70 @@ Session 超时：最后一次请求后 30 分钟无新请求，Session 自动标
 
 ---
 
+## 5.1 Agent Trace 扩展设计
+
+PRD V2.0 §4 要求 Agent Trace 能力，支持多步骤工具调用链追踪:
+
+### 5.1.1 trace 表 Agent 扩展字段
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `agent_session_id` | String | Agent 会话标识（多轮工具调用共享） |
+| `parent_span_id` | String | 父 Span ID（支持嵌套调用） |
+| `span_type` | String | llm_call / tool_call / function_result / human_input |
+| `tool_name` | String | 调用的工具名称（如 search_database） |
+| `tool_input` | String | 工具输入参数 JSON |
+| `tool_output` | String | 工具返回结果 JSON |
+| `token_cost_per_tool` | UInt32 | 每个工具调用的 Token 消耗 |
+
+### 5.1.2 Agent Span 关联模型
+
+```
+Agent Session (agent_session_id 聚合)
+    │
+    ├── Span 1 (span_type=llm_call, 用户问题: "帮我查一下Q3财报")
+    │     └── Span 2 (span_type=tool_call, tool=search_database, parent=Span1)
+    │           └── Span 2.1 (span_type=function_result, tool_output="{...}", parent=Span2)
+    │
+    ├── Span 3 (span_type=llm_call, 总结搜索结果)
+    │     └── Span 4 (span_type=tool_call, tool=generate_chart)
+    │           └── Span 4.1 (span_type=function_result, chart_url=..., parent=Span4)
+    │
+    └── Span 5 (span_type=llm_call, 最终回复)
+
+获取方式：
+  GET /api/v1/traces/agent/{agent_session_id}
+  返回按 parent_span_id 构建的树形 Span 列表
+```
+
+### 5.1.3 Session 视图 Agent 扩展
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `agent_tool_usage` | JSON | 工具调用频率统计 [{tool: "search", count: 5}, ...] |
+| `agent_token_waste` | UInt32 | 低效工具调用浪费的 Token |
+| `agent_loop_detected` | UInt8 | 是否检测到循环调用（同 tool + 同参数 > 3 次） |
+| `agent_total_steps` | UInt16 | Agent 总步数 |
+
+### 5.1.4 Agent 异常检测规则
+
+| 规则 | 触发条件 | 级别 |
+|------|---------|------|
+| 工具循环 | 同一 agent_session 内相同 tool+input 重复 > 3 次 | CRITICAL |
+| Token 浪费 | agent_token_waste / total_tokens > 30% | WARNING |
+| 超长 Agent | agent_total_steps > 20 | WARNING |
+| 工具调用失败率 | tool 调用失败率 > 50% | CRITICAL |
+
+### 5.1.5 Agent Trace REST API
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| GET | `/api/v1/traces/agent/{agent_session_id}` | 获取 Agent Session 完整树形 Trace |
+| GET | `/api/v1/traces/agent/{agent_session_id}/graph` | 获取 Agent 调用图（D3.js 可视化数据） |
+| GET | `/api/v1/dashboard/agent/metrics` | Agent 聚合指标（工具使用率、循环检测数） |
+
+---
+
 ## 6. 三层存储策略
 
 | 数据层 | 保留时长 | 存储介质 | 查询 P95 | 包含字段 |

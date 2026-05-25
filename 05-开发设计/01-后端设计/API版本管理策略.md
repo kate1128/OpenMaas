@@ -1,9 +1,12 @@
 # API 版本管理策略
 
-**文档版本：** V1.0  
-**编写日期：** 2026年05月14日  
-**适用范围：** MaaS 平台对外开放 API  
+**文档版本：** V2.0  
+**编写日期：** 2026年05月25日  
+**适用范围：** MaaS 平台对外开放 API（OpenAI / Anthropic / Gemini 兼容端点）  
+**关联PRD：** `产品设计/MaaS-PRD-V2.0/`  
 **负责人：** 后端负责人 + 产品负责人
+
+**变更说明：** V2.0 对齐 PRD V2.0：新增多协议端点版本管理（OpenAI/Anthropic/Gemini 各自原生版本演进策略）；新增协议废弃/迁移策略（deprecation notice + migration guide）
 
 ---
 

@@ -179,6 +179,19 @@
         </div>
       </div>
 
+      <!-- 审批中心 -->
+      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="approval-center">
+        <i class="fa-solid fa-clipboard-check nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+        <span class="sidebar-text whitespace-nowrap">审批中心</span>
+        <span class="ml-auto bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5 leading-none sidebar-text" id="approvalBadge">3</span>
+      </button>
+
+      <!-- 微调管理 -->
+      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="finetune">
+        <i class="fa-solid fa-microchip nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+        <span class="sidebar-text whitespace-nowrap">微调管理</span>
+      </button>
+
       <!-- 11. 告警与合同 -->
       <div>
         <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" onclick="toggleNavGroup('ng-alerts', this)">
@@ -3336,6 +3349,221 @@
     </main>
   </div>
 
+  <!-- ====== 审批中心 ====== -->
+  <div id="approval-center" class="section">
+    <div class="max-w-5xl mx-auto px-6 py-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-xl font-bold text-slate-900">审批中心</h1>
+          <p class="text-sm text-slate-500 mt-1">管理待审批事项与审批历史</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <select class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <option>全部类型</option>
+            <option>路由策略变更</option>
+            <option>模型上线申请</option>
+            <option>合规策略变更</option>
+            <option>预算增额申请</option>
+            <option>API Key 提权</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 审批选项卡 -->
+      <div class="flex gap-4 border-b border-slate-200 mb-6">
+        <button class="px-3 py-2.5 text-sm font-medium text-blue-600 border-b-2 border-blue-600 -mb-px" onclick="switchApprovalTab('pending', this)">待审批 <span class="ml-1 bg-red-500 text-white text-[10px] rounded-full px-1.5">3</span></button>
+        <button class="px-3 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700" onclick="switchApprovalTab('history', this)">已审批</button>
+        <button class="px-3 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700" onclick="switchApprovalTab('my', this)">我发起的</button>
+      </div>
+
+      <!-- 待审批列表 -->
+      <div id="approvalPendingList">
+        <!-- 审批项1：路由策略变更 P0 -->
+        <div class="bg-white border border-slate-200 rounded-xl p-5 mb-4 hover:shadow-sm transition-shadow">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">P0 · 极高风险</span>
+              <span class="text-xs text-slate-400">#REQ-2026-0582</span>
+              <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>2小时前</span>
+            </div>
+            <span class="text-xs text-slate-400">发起人：zhang.wei</span>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">路由策略变更：将「金融客服bot」路由策略从PERFORMANCE切换为COST_OPTIMAL</h3>
+          <div class="flex items-center gap-6 text-xs text-slate-500 mb-4">
+            <span><i class="fa-solid fa-building mr-1"></i>租户：某银行科技部</span>
+            <span><i class="fa-solid fa-folder mr-1"></i>项目：智能客服系统</span>
+            <span class="text-amber-600 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i>需双人审批</span>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 mb-4">
+            <p class="text-xs text-slate-600 leading-relaxed"><span class="font-medium">变更说明：</span>当前PERFORMANCE策略使用openai/gpt-4o，月均成本$12,400。评估发现同能力档位的deepseek/deepseek-chat可满足90%场景，切换后预计月均成本降至$3,800（节省69%）。已通过策略模拟验证，P95延迟从320ms升至480ms，仍在SLA范围内。</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg" onclick="handleApproval('REQ-2026-0582','approved')"><i class="fa-solid fa-check mr-1"></i>批准</button>
+            <button class="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg" onclick="handleApproval('REQ-2026-0582','rejected')"><i class="fa-solid fa-xmark mr-1"></i>拒绝</button>
+            <button class="px-3 py-2 text-sm border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-message mr-1"></i>评论</button>
+            <button class="px-3 py-2 text-sm border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-eye mr-1"></i>查看策略详情</button>
+          </div>
+        </div>
+
+        <!-- 审批项2：合规策略变更 P1 -->
+        <div class="bg-white border border-slate-200 rounded-xl p-5 mb-4 hover:shadow-sm transition-shadow">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">P1 · 高风险</span>
+              <span class="text-xs text-slate-400">#REQ-2026-0591</span>
+              <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>5小时前</span>
+            </div>
+            <span class="text-xs text-slate-400">发起人：li.ming</span>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">合规策略变更：为「客户数据分析」项目关闭PII检测中的MASK模式，改为WARN模式</h3>
+          <div class="flex items-center gap-6 text-xs text-slate-500 mb-4">
+            <span><i class="fa-solid fa-building mr-1"></i>租户：某保险集团</span>
+            <span><i class="fa-solid fa-folder mr-1"></i>项目：客户数据分析</span>
+            <span class="text-amber-600 font-medium"><i class="fa-solid fa-triangle-exclamation mr-1"></i>需安全负责人审批</span>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 mb-4">
+            <p class="text-xs text-slate-600 leading-relaxed"><span class="font-medium">变更说明：</span>当前做MASK脱敏后模型输出不可读，影响分析质量。申请降级为WARN模式（检测到PII时告警但放行），同时开启响应侧合规检测作为补偿控制。</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"><i class="fa-solid fa-check mr-1"></i>批准</button>
+            <button class="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg"><i class="fa-solid fa-xmark mr-1"></i>拒绝</button>
+            <button class="px-3 py-2 text-sm border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-message mr-1"></i>评论</button>
+          </div>
+        </div>
+
+        <!-- 审批项3：Key 提权 P2 -->
+        <div class="bg-white border border-slate-200 rounded-xl p-5 mb-4 hover:shadow-sm transition-shadow">
+          <div class="flex items-start justify-between mb-3">
+            <div class="flex items-center gap-3">
+              <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">P2 · 中风险</span>
+              <span class="text-xs text-slate-400">#REQ-2026-0598</span>
+              <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>8小时前</span>
+            </div>
+            <span class="text-xs text-slate-400">发起人：wang.fang</span>
+          </div>
+          <h3 class="font-semibold text-slate-900 mb-2">API Key 提权申请：mk-dev-xxx → 申请临时提升为生产级权限（Break Glass）</h3>
+          <div class="flex items-center gap-6 text-xs text-slate-500 mb-4">
+            <span><i class="fa-solid fa-key mr-1"></i>Key: mk-dev-a1b2c3d4e5f6</span>
+            <span class="text-amber-600 font-medium"><i class="fa-solid fa-hourglass-half mr-1"></i>紧急访问 · TTL 60分钟</span>
+          </div>
+          <div class="bg-slate-50 rounded-lg p-3 mb-4">
+            <p class="text-xs text-slate-600 leading-relaxed"><span class="font-medium">申请理由：</span>生产环境突发故障，需紧急调用GPT-4o排查问题。当前dev环境Key无生产模型访问权限。承诺操作后提交完整审计说明。</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button class="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"><i class="fa-solid fa-check mr-1"></i>批准（限60分钟）</button>
+            <button class="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg"><i class="fa-solid fa-xmark mr-1"></i>拒绝</button>
+            <button class="px-3 py-2 text-sm border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-clock mr-1"></i>修改TTL</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 已审批列表（默认隐藏） -->
+      <div id="approvalHistoryList" class="hidden">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left text-slate-400 border-b border-slate-100 text-xs"><th class="py-2 font-medium">请求ID</th><th class="py-2 font-medium">类型</th><th class="py-2 font-medium">发起人</th><th class="py-2 font-medium">审批人</th><th class="py-2 font-medium">结果</th><th class="py-2 font-medium">时间</th></tr></thead>
+          <tbody>
+            <tr class="border-b border-slate-50 hover:bg-slate-50"><td class="py-3 text-slate-500">#REQ-0580</td><td>路由策略</td><td>chen.xu</td><td>zhang.wei</td><td><span class="text-green-600 font-medium">已批准</span></td><td class="text-slate-400">2026-05-24 14:30</td></tr>
+            <tr class="border-b border-slate-50 hover:bg-slate-50"><td class="py-3 text-slate-500">#REQ-0578</td><td>模型上线</td><td>huang.li</td><td>li.ming</td><td><span class="text-red-500 font-medium">已拒绝</span></td><td class="text-slate-400">2026-05-24 10:15</td></tr>
+            <tr class="border-b border-slate-50 hover:bg-slate-50"><td class="py-3 text-slate-500">#REQ-0575</td><td>预算增额</td><td>zhou.jie</td><td>wang.fang</td><td><span class="text-green-600 font-medium">已批准</span></td><td class="text-slate-400">2026-05-23 16:45</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 微调管理 ====== -->
+  <div id="finetune" class="section">
+    <div class="max-w-5xl mx-auto px-6 py-6">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h1 class="text-xl font-bold text-slate-900">微调管理</h1>
+          <p class="text-sm text-slate-500 mt-1">管理模型微调任务与数据集</p>
+        </div>
+        <button class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg" onclick="openModal('finetuneModalMask')"><i class="fa-solid fa-plus mr-1.5"></i>新建微调任务</button>
+      </div>
+
+      <!-- 选项卡 -->
+      <div class="flex gap-4 border-b border-slate-200 mb-6">
+        <button class="px-3 py-2.5 text-sm font-medium text-blue-600 border-b-2 border-blue-600 -mb-px" id="ftTasksTab" onclick="document.getElementById('ft-tasks').classList.remove('hidden');document.getElementById('ft-datasets').classList.add('hidden');document.getElementById('ft-models').classList.add('hidden');this.classList.add('text-blue-600','border-b-2','border-blue-600');">微调任务</button>
+        <button class="px-3 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700" onclick="document.getElementById('ft-tasks').classList.add('hidden');document.getElementById('ft-datasets').classList.remove('hidden');document.getElementById('ft-models').classList.add('hidden')">训练数据集</button>
+        <button class="px-3 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700" onclick="document.getElementById('ft-tasks').classList.add('hidden');document.getElementById('ft-datasets').classList.add('hidden');document.getElementById('ft-models').classList.remove('hidden')">我的模型</button>
+      </div>
+
+      <!-- 微调任务列表 -->
+      <div id="ft-tasks">
+        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-slate-400 border-b border-slate-100 text-xs"><th class="py-3 px-4 font-medium">任务名称</th><th class="py-3 px-4 font-medium">基础模型</th><th class="py-3 px-4 font-medium">数据集</th><th class="py-3 px-4 font-medium">状态</th><th class="py-3 px-4 font-medium">创建时间</th><th class="py-3 px-4 font-medium">操作</th></tr></thead>
+            <tbody>
+              <tr class="border-b border-slate-50 hover:bg-slate-50">
+                <td class="py-3 px-4"><span class="font-medium text-slate-900">客服意图分类-v2</span></td>
+                <td class="py-3 px-4 text-slate-500">qwen2.5-7b</td>
+                <td class="py-3 px-4 text-slate-500">客服对话-标注集-12K</td>
+                <td class="py-3 px-4"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-100 text-green-700">已完成</span></td>
+                <td class="py-3 px-4 text-slate-400">2026-05-20</td>
+                <td class="py-3 px-4"><button class="text-blue-600 hover:text-blue-800 text-xs">部署</button><span class="text-slate-300 mx-2">|</span><button class="text-slate-500 hover:text-slate-700 text-xs">详情</button></td>
+              </tr>
+              <tr class="border-b border-slate-50 hover:bg-slate-50">
+                <td class="py-3 px-4"><span class="font-medium text-slate-900">合同条款提取-v1</span></td>
+                <td class="py-3 px-4 text-slate-500">llama3-8b</td>
+                <td class="py-3 px-4 text-slate-500">法务合同-标注集-8K</td>
+                <td class="py-3 px-4"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700"><i class="fa-solid fa-spinner fa-pulse text-[10px]"></i>训练中</span></td>
+                <td class="py-3 px-4 text-slate-400">2026-05-24</td>
+                <td class="py-3 px-4"><button class="text-slate-400 text-xs cursor-not-allowed">部署</button><span class="text-slate-300 mx-2">|</span><button class="text-blue-600 hover:text-blue-800 text-xs">查看进度</button></td>
+              </tr>
+              <tr class="border-b border-slate-50 hover:bg-slate-50">
+                <td class="py-3 px-4"><span class="font-medium text-slate-900">代码审查助手-v3</span></td>
+                <td class="py-3 px-4 text-slate-500">deepseek-coder-6.7b</td>
+                <td class="py-3 px-4 text-slate-500">代码审查-标注集-15K</td>
+                <td class="py-3 px-4"><span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700">失败</span></td>
+                <td class="py-3 px-4 text-slate-400">2026-05-18</td>
+                <td class="py-3 px-4"><button class="text-blue-600 hover:text-blue-800 text-xs">查看日志</button><span class="text-slate-300 mx-2">|</span><button class="text-blue-600 hover:text-blue-800 text-xs">重试</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 训练数据集 -->
+      <div id="ft-datasets" class="hidden">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-400">
+          <i class="fa-solid fa-database text-4xl mb-3 block"></i>
+          <p class="text-sm">暂无训练数据集</p>
+          <button class="mt-3 px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-lg">上传数据集</button>
+        </div>
+      </div>
+
+      <!-- 我的模型 -->
+      <div id="ft-models" class="hidden">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-400">
+          <i class="fa-solid fa-microchip text-4xl mb-3 block"></i>
+          <p class="text-sm">微调完成后，模型将出现在此处</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 微调任务弹窗 -->
+  <div class="modal-mask fixed inset-0 bg-black/40 items-center justify-center z-50" id="finetuneModalMask">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] flex flex-col">
+      <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <h3 class="font-semibold text-slate-900">新建微调任务</h3>
+        <button class="text-slate-400 hover:text-slate-600" onclick="closeModal('finetuneModalMask')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="px-6 py-4 space-y-4 flex-1 overflow-y-auto">
+        <div><label class="block text-xs font-medium text-slate-700 mb-1">任务名称</label><input id="ftName" type="text" placeholder="如：客服意图分类-v1" class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></div>
+        <div><label class="block text-xs font-medium text-slate-700 mb-1">基础模型</label><select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"><option>qwen2.5-7b</option><option>llama3-8b</option><option>deepseek-coder-6.7b</option><option>qwen2.5-72b (LoRA)</option></select></div>
+        <div><label class="block text-xs font-medium text-slate-700 mb-1">训练数据集</label><select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"><option>客服对话-标注集-12K</option><option>法务合同-标注集-8K</option></select></div>
+        <div><label class="block text-xs font-medium text-slate-700 mb-1">微调方式</label><select class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"><option>LoRA (推荐，轻量)</option><option>QLoRA (更低显存)</option><option>Full Fine-tune (全参数)</option></select></div>
+        <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700"><i class="fa-solid fa-circle-info mr-1"></i>预估费用：$12.40 · 预估时长：约35分钟</div>
+      </div>
+      <div class="flex justify-end gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
+        <button class="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-lg" onclick="closeModal('finetuneModalMask')">取消</button>
+        <button class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg" onclick="closeModal('finetuneModalMask');showToast('微调任务已创建，等待调度')">创建任务</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 弹窗：新建项目 -->
   <div class="modal-mask fixed inset-0 bg-black/40 items-center justify-center z-50" id="modal-new-project">
     <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
@@ -4109,12 +4337,20 @@ print(response.choices[0].message.content)</code></pre>
       });
     });
 
-    // 顶层仪表板按钮绑定（单独绑定，不属于 sub-item）
-    document.querySelector('.nav-item[data-target="dashboard"]')?.addEventListener('click', () => {
-      document.querySelectorAll('.nav-sub-item').forEach(n => n.classList.remove('active'));
-      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-      document.getElementById('dashboard').classList.add('active');
-      document.getElementById('headerTitle').textContent = '仪表板';
+    // 顶层 nav-item 绑定（dashboard / approval-center / finetune 等非 sub-item）
+    document.querySelectorAll('.nav-item[data-target]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.dataset.target;
+        // 跳过已被 sub-item 处理的
+        if (btn.classList.contains('nav-sub-item')) return;
+        document.querySelectorAll('.nav-sub-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        btn.classList.add('active');
+        const sec = document.getElementById(target);
+        if (sec) sec.classList.add('active');
+        document.getElementById('headerTitle').textContent = navTitles[target] || target;
+      });
     });
     document.querySelector('.nav-item[data-target="dashboard"]').click();
 
@@ -6212,6 +6448,19 @@ print(response.choices[0].message.content)</code></pre>
       setTimeout(() => {
         showToast('✓ Key 已撤销，安全事件待办已创建，通知邮件已发送');
       }, 2000);
+    }
+
+    // === 审批中心 ===
+    function switchApprovalTab(tab, btn) {
+      const tabs = btn.parentElement.querySelectorAll('button');
+      tabs.forEach(t => { t.classList.remove('text-blue-600','border-b-2','border-blue-600'); t.classList.add('text-slate-500'); });
+      btn.classList.add('text-blue-600','border-b-2','border-blue-600');
+      btn.classList.remove('text-slate-500');
+      document.getElementById('approvalPendingList').classList.toggle('hidden', tab !== 'pending');
+      document.getElementById('approvalHistoryList').classList.toggle('hidden', tab !== 'history');
+    }
+    function handleApproval(reqId, action) {
+      showToast(action === 'approved' ? '已批准 ' + reqId : '已拒绝 ' + reqId);
     }
   </script>
 

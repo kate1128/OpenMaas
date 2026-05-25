@@ -100,6 +100,13 @@
         <i class="fa-solid fa-file-shield nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
         <span class="sidebar-text whitespace-nowrap">合规报告</span>
       </button>
+
+      <p class="sidebar-group-label text-xs font-semibold text-slate-400 uppercase tracking-wider px-3 pt-3 pb-1.5">审批</p>
+      <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="approval-center">
+        <i class="fa-solid fa-clipboard-check nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
+        <span class="sidebar-text whitespace-nowrap">审批中心</span>
+        <span class="ml-auto bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5 leading-none sidebar-text" id="adminApprovalBadge">5</span>
+      </button>
       <button class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors" data-target="status-notification">
         <i class="fa-solid fa-bell nav-icon w-4 text-center text-slate-400 text-xs flex-shrink-0"></i>
         <span class="sidebar-text whitespace-nowrap">状态通知</span>
@@ -1922,6 +1929,147 @@
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"><div class="px-5 py-4 border-b border-slate-200"><h2 class="text-sm font-semibold text-slate-800">交付项目清单</h2></div><table class="w-full text-sm"><thead><tr class="bg-slate-50 border-b border-slate-200"><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">客户</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">形态</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">组件</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">验收</th><th class="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase">状态</th></tr></thead><tbody class="divide-y divide-slate-100"><tr><td class="px-5 py-3 font-medium">华东金融集团</td><td class="px-5 py-3">专有云</td><td class="px-5 py-3">Gateway / Routing / Billing / Audit</td><td class="px-5 py-3">性能压测中</td><td class="px-5 py-3"><span class="bg-blue-50 text-blue-700 px-2 py-0.5 rounded text-xs font-medium">交付中</span></td></tr><tr><td class="px-5 py-3 font-medium">制造行业客户A</td><td class="px-5 py-3">混合云</td><td class="px-5 py-3">本地审计 / 云端模型路由</td><td class="px-5 py-3">通过</td><td class="px-5 py-3"><span class="bg-green-50 text-green-700 px-2 py-0.5 rounded text-xs font-medium">已上线</span></td></tr><tr><td class="px-5 py-3 font-medium">政务客户B</td><td class="px-5 py-3">一体机</td><td class="px-5 py-3">离线模型包 / 监控 / 审计</td><td class="px-5 py-3">安全加固中</td><td class="px-5 py-3"><span class="bg-amber-50 text-amber-700 px-2 py-0.5 rounded text-xs font-medium">待验收</span></td></tr></tbody></table></div>
       </div>
 
+      <!-- ====== Admin 审批中心 ====== -->
+      <div id="approval-center" class="section">
+    <!-- 筛选栏 + 批量操作 -->
+    <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center gap-3">
+        <select class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+          <option>全部类型</option><option>路由策略审批</option><option>供应商准入审批</option><option>租户套餐变更</option><option>模型上下线</option><option>合规策略变更</option><option>Key 紧急提权</option>
+        </select>
+        <select class="border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+          <option>全部风险等级</option><option>P0 · 极高风险</option><option>P1 · 高风险</option><option>P2 · 中风险</option>
+        </select>
+        <span class="text-xs text-slate-400">共 5 条待审批</span>
+      </div>
+      <button class="text-xs text-blue-600 hover:text-blue-800 font-medium"><i class="fa-solid fa-gear mr-1"></i>审批规则配置</button>
+    </div>
+
+    <!-- KPI 卡片 -->
+    <div class="grid grid-cols-4 gap-4 mb-5">
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wide">待审批</p>
+        <p class="text-2xl font-bold text-red-600 mt-1 mb-1.5">5</p>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700">P0: 1 &nbsp; P1: 3 &nbsp; P2: 1</span>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wide">今日已审批</p>
+        <p class="text-2xl font-bold text-green-600 mt-1 mb-1.5">12</p>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-50 text-green-700">通过 10 &nbsp; 拒绝 2</span>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wide">平均审批时长</p>
+        <p class="text-2xl font-bold text-slate-800 mt-1 mb-1.5">2.3h</p>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700">P0均1.1h &nbsp; P1均3.2h</span>
+      </div>
+      <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+        <p class="text-xs font-medium text-slate-400 uppercase tracking-wide">超时未审批</p>
+        <p class="text-2xl font-bold text-amber-600 mt-1 mb-1.5">1</p>
+        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700">#AR-0042 已超48h</span>
+      </div>
+    </div>
+
+    <!-- 审批选项卡 -->
+    <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden mb-5">
+      <div class="flex gap-0 border-b border-slate-200">
+        <button class="px-5 py-3 text-sm font-semibold text-blue-600 border-b-2 border-blue-600 bg-blue-50/50">待审批 <span class="ml-1.5 bg-red-500 text-white text-[10px] rounded-full px-1.5 py-0.5">5</span></button>
+        <button class="px-5 py-3 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-50">已审批</button>
+        <button class="px-5 py-3 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-50">全部审批记录</button>
+        <button class="px-5 py-3 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-50">审批配置</button>
+      </div>
+
+      <!-- P0 审批项（红色边框高亮） -->
+      <div class="border-l-4 border-red-500 bg-red-50/30 p-5 border-b border-slate-100">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">P0 · 极高风险</span>
+            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-amber-100 text-amber-700"><i class="fa-solid fa-users text-[10px]"></i> 需双人审批</span>
+            <span class="text-xs text-slate-400 font-mono">#AR-2026-0042</span>
+          </div>
+          <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>3小时前 · 发起人：li.ming</span>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-sm mb-3">ZDR 模式降级：某保险集团「理赔分析」项目申请从 TRUE_ZERO_RETENTION 切换至 METADATA_ONLY</h3>
+        <div class="grid grid-cols-2 gap-3 mb-4">
+          <div class="bg-white rounded-lg p-3 border border-slate-200">
+            <p class="text-xs text-slate-500 mb-2"><i class="fa-solid fa-building mr-1"></i>租户：某保险集团 &nbsp;|&nbsp; <i class="fa-solid fa-folder mr-1"></i>项目：理赔分析</p>
+            <p class="text-xs text-slate-500"><i class="fa-solid fa-shield-halved mr-1"></i>安全负责人：zhang.wei (tenant_security_officer)</p>
+          </div>
+          <div class="bg-white rounded-lg p-3 border border-slate-200">
+            <p class="text-xs font-medium text-slate-700 mb-1">审批进度</p>
+            <div class="flex items-center gap-2 text-xs">
+              <span class="text-green-600 font-medium"><i class="fa-solid fa-circle-check mr-0.5"></i>#1 zhang.wei 已批准</span>
+              <i class="fa-solid fa-arrow-right text-slate-300 text-[10px]"></i>
+              <span class="text-amber-600 font-medium"><i class="fa-solid fa-circle mr-0.5"></i>#2 platform_security_officer 待审批</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"><i class="fa-solid fa-check mr-1.5"></i>批准</button>
+          <button class="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg"><i class="fa-solid fa-xmark mr-1.5"></i>拒绝</button>
+          <button class="px-4 py-2 text-sm border border-slate-200 bg-white text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-message mr-1.5"></i>评论</button>
+          <button class="px-4 py-2 text-sm border border-slate-200 bg-white text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-link mr-1.5"></i>查看完整审批链</button>
+        </div>
+      </div>
+
+      <!-- P1 审批项：模型下线 -->
+      <div class="border-l-4 border-orange-400 p-5 border-b border-slate-100">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">P1 · 高风险</span>
+            <span class="text-xs text-slate-400 font-mono">#AR-2026-0045</span>
+          </div>
+          <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>6小时前 · 发起人：model_curator</span>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-sm mb-3">模型下线审批：maas:gpt-3.5-turbo → deprecated（T-30天通知已发送，12个租户受影响）</h3>
+        <div class="flex items-center gap-3">
+          <button class="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"><i class="fa-solid fa-check mr-1.5"></i>批准下线</button>
+          <button class="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg"><i class="fa-solid fa-xmark mr-1.5"></i>拒绝</button>
+          <button class="px-4 py-2 text-sm border border-slate-200 bg-white text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-chart-bar mr-1.5"></i>查看影响评估报告</button>
+          <button class="px-4 py-2 text-sm border border-slate-200 bg-white text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-diagram-project mr-1.5"></i>查看替换图谱</button>
+        </div>
+      </div>
+
+      <!-- P1 审批项：供应商准入 -->
+      <div class="border-l-4 border-orange-400 p-5 border-b border-slate-100">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700">P1 · 高风险</span>
+            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-700">供应商准入</span>
+            <span class="text-xs text-slate-400 font-mono">#AR-2026-0047</span>
+          </div>
+          <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>1天前 · 发起人：operations_admin</span>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-sm mb-3">新供应商准入审批：xAI (Grok 3) — 安全评估已通过</h3>
+        <div class="grid grid-cols-3 gap-3 mb-4">
+          <div class="bg-slate-50 rounded-lg p-2.5 text-center"><p class="text-xs text-slate-400 mb-0.5">SLA</p><p class="text-sm font-semibold text-slate-700">99.5% uptime</p><p class="text-xs text-slate-400">200ms P95</p></div>
+          <div class="bg-slate-50 rounded-lg p-2.5 text-center"><p class="text-xs text-slate-400 mb-0.5">安全评估</p><p class="text-sm font-semibold text-green-600">通过</p><p class="text-xs text-slate-400">US only</p></div>
+          <div class="bg-slate-50 rounded-lg p-2.5 text-center"><p class="text-xs text-slate-400 mb-0.5">价格</p><p class="text-sm font-semibold text-slate-700">$5/$15 /1M</p><p class="text-xs text-slate-400">prompt/completion</p></div>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"><i class="fa-solid fa-check mr-1.5"></i>批准准入</button>
+          <button class="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg"><i class="fa-solid fa-xmark mr-1.5"></i>拒绝</button>
+          <button class="px-4 py-2 text-sm border border-slate-200 bg-white text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-file-pdf mr-1.5"></i>查看安全评估报告</button>
+          <button class="px-4 py-2 text-sm border border-slate-200 bg-white text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-file-contract mr-1.5"></i>查看SLA协议</button>
+        </div>
+      </div>
+
+      <!-- P2 审批项 -->
+      <div class="border-l-4 border-blue-400 p-5">
+        <div class="flex items-start justify-between mb-3">
+          <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">P2 · 中风险</span>
+            <span class="text-xs text-slate-400 font-mono">#AR-2026-0051</span>
+          </div>
+          <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i>2天前 · 发起人：tenant_admin (制造行业客户A)</span>
+        </div>
+        <h3 class="font-semibold text-slate-900 text-sm mb-3">租户套餐变更：制造行业客户A 申请从「标准版」升级至「企业版」（月费从¥5,000升至¥20,000）</h3>
+        <div class="flex items-center gap-3">
+          <button class="px-4 py-2 text-sm bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg"><i class="fa-solid fa-check mr-1.5"></i>批准</button>
+          <button class="px-4 py-2 text-sm bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg"><i class="fa-solid fa-xmark mr-1.5"></i>拒绝</button>
+          <button class="px-4 py-2 text-sm border border-slate-200 bg-white text-slate-600 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-file-invoice mr-1.5"></i>查看合同详情</button>
+        </div>
+      </div>
+    </div>
     </main>
   </div>
 
@@ -3119,7 +3267,7 @@
 
   <script>
     // 导航
-    const navTitles = { overview:'全局概览', monitoring:'全局监控', audit:'审计日志', tenants:'租户管理', 'tenant-create':'新建租户', models:'模型管理', vendors:'厂商管理', 'vendor-governance':'供应商治理', billing:'账单管理', contracts:'商业管理', settings:'系统配置', 'global-routing':'全局路由', quality:'质量-成本分析', disaster:'容灾演练管理', 'compliance-report':'合规报告', 'status-notification':'状态通知', 'private-delivery':'私有化交付' };
+    const navTitles = { overview:'全局概览', monitoring:'全局监控', audit:'审计日志', tenants:'租户管理', 'tenant-create':'新建租户', models:'模型管理', vendors:'厂商管理', 'vendor-governance':'供应商治理', billing:'账单管理', contracts:'商业管理', settings:'系统配置', 'global-routing':'全局路由', quality:'质量-成本分析', disaster:'容灾演练管理', 'compliance-report':'合规报告', 'status-notification':'状态通知', 'private-delivery':'私有化交付', 'approval-center':'审批中心' };
     document.querySelectorAll('.nav-item[data-target]').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));

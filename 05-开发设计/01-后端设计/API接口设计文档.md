@@ -1,11 +1,13 @@
 # MaaS平台 API接口设计文档
 
-**文档版本：** V1.0  
-**编写日期：** 2026年05月14日  
+**文档版本：** V2.0  
+**编写日期：** 2026年05月25日  
 **文档状态：** 初稿  
-**关联PRD：** maas平台PRD文档.md V4.0  
+**关联PRD：** `产品设计/MaaS-PRD-V2.0/`  
 **API Base URL：** `https://api.maas-platform.com`  
 **密级：** 内部
+
+**变更说明：** V2.0 对齐 PRD V2.0：新增 Anthropic / Gemini 兼容端点；认证升级为 API Key（5种类型）+ SSO JWT 双模；新增 RBAC 权限级别（19角色）；新增合规安全 API（Guardrails/KMS/审计）；新增 FinOps API（成本仪表板/异常检测/节省建议）；新增 Prompt评测 API（A/B实验/评测任务）；错误码扩展。
 
 ---
 
@@ -86,7 +88,8 @@ https://api.maas-platform.com/{version}/{resource}/{action}
 
 | Header | 必选 | 说明 |
 |--------|------|------|
-| `Authorization: Bearer {api_key}` | 是 | API认证密钥 |
+| `Authorization: Bearer {api_key}` | 条件必选 | API Key认证（5种类型：mk-prod/mk-dev/mk-ci/mk-pg/mk-sub） |
+| `X-MaaS-Token: {jwt_token}` | 条件必选 | SSO JWT认证（SAML2/OIDC），替代API Key |
 | `Content-Type: application/json` | 是（POST/PUT/PATCH） | 请求体格式 |
 | `X-Request-ID` | 否 | 客户端请求ID，用于幂等与追踪 |
 | `X-Tenant-ID` | 否 | 多租户场景下指定租户（管理员接口） |
@@ -95,22 +98,36 @@ https://api.maas-platform.com/{version}/{resource}/{action}
 
 ## 2. 认证与授权
 
-### 2.1 认证方式
+### 2.1 双模认证
 
-所有接口均通过 `Authorization: Bearer {api_key}` 进行认证。
+**模式一：API Key 认证**
+- Header：`Authorization: Bearer {api_key}`
+- Key格式：`mk-prod-{32位}` / `mk-dev-{32位}` / `mk-ci-{32位}` / `mk-pg-{32位}` / `mk-sub-{32位}`
+- 认证方式：HMAC-SHA256(key, platform_secret) → Redis/DB查询
+- Key生命周期：`ACTIVE → SUSPENDED/EXPIRED/REVOKED → ...`
 
-API Key 格式：`sk-maas-{32位随机字符}`
+**模式二：SSO JWT 认证**
+- Header：`X-MaaS-Token: {jwt_token}`
+- gRPC auth-service.ValidateJWT：验证 iss/exp/aud/sig
+- 解析 claims：{tenant_id, user_id, roles[]}
 
-### 2.2 权限级别
+### 2.2 权限级别（19角色RBAC — PRD §01）
 
-| 接口分组 | 所需权限 | 说明 |
+| 角色层级 | 角色ID | 说明 |
+|---------|--------|------|
+| **平台级（8个）** | `platform_owner`, `platform_admin`, `security_officer`, `auditor`, `billing_admin`, `support_engineer`, `readonly_viewer` | 平台级管理 |
+| **租户级（6个）** | `tenant_admin`, `billing_admin`, `security_officer`, `developer_admin`, `developer`, `procurement_officer` | 租户级管理 |
+| **项目级（5个）** | `project_admin`, `project_developer`, `project_viewer`, `project_model_curator`, `project_eval_engineer` | 项目级协作 |
+
+| 接口分组 | 所需权限（示例） | 说明 |
 |---------|---------|------|
 | 推理接口 | `api_key:invoke` | 基础开发者权限 |
 | 模型查询 | `model:read` | 基础开发者权限 |
 | API Key管理 | `apikey:manage` | 开发者自管理 |
 | 路由策略 | `routing:manage` | 项目管理员 |
 | 计费查询 | `billing:read` | 开发者/管理员 |
-| 平台管理 | `admin:*` | 平台管理员 |
+| 合规安全策略 | `compliance:manage` | 安全负责人 |
+| 平台管理 | `platform:admin` | 平台管理员 |
 
 ---
 
@@ -189,6 +206,7 @@ API Key 格式：`sk-maas-{32位随机字符}`
   "usage": {
     "prompt_tokens": 45,
     "completion_tokens": 128,
+    "cached_input_tokens": 0,
     "total_tokens": 173
   },
   "x_maas": {
@@ -278,6 +296,48 @@ data: [DONE]
   ]
 }
 ```
+
+---
+
+## 3A. Anthropic 兼容端点（V2.0 新增）
+
+### 3A.1 Anthropic Messages
+
+**接口：** `POST /v1/anthropic/messages`
+
+完全兼容 Anthropic Messages API。请求体格式参考 [Anthropic API 文档](https://docs.anthropic.com/en/api/messages)。
+
+**兼容性说明：** gateway 自动将 Anthropic 格式归一化为 StandardRequest，进入标准中间件链（认证/限流/合规/路由），adapter 侧 LiteLLM 自动转换为 Anthropic 原生协议调用。
+
+### 3A.2 Anthropic 流式 Messages
+
+**接口：** `POST /v1/anthropic/messages/stream`
+
+SSE 流式响应，兼容 Anthropic Streaming 格式。
+
+---
+
+## 3B. Gemini 兼容端点（V2.0 新增）
+
+### 3B.1 Gemini 内容生成
+
+**接口：** `POST /v1/gemini/generateContent`
+
+兼容 Google Gemini API 格式。
+
+### 3B.2 Gemini 流式生成
+
+**接口：** `POST /v1/gemini/streamGenerateContent`
+
+SSE 流式响应。
+
+---
+
+## 3C. WebSocket 端点（V2.0 新增）
+
+**接口：** `ws://api.maas-platform.com/v1/ws`
+
+基于 WebSocket 的流式对话代理。连接后发送 JSON 消息（包含 model / messages / stream=true），接收流式 text/event-stream 帧。
 
 ---
 
@@ -681,24 +741,53 @@ data: [DONE]
 | 503 | 服务暂时不可用 |
 | 504 | 上游模型服务超时 |
 
-### 9.2 业务错误码
+### 9.2 业务错误码（V2.0 扩展）
 
+**通用/认证错误：**
 | 错误码 | HTTP状态 | 说明 |
 |--------|---------|------|
 | `invalid_api_key` | 401 | API Key无效或已吊销 |
 | `api_key_expired` | 401 | API Key已过期 |
-| `insufficient_quota` | 402 | Token额度不足 |
-| `budget_exceeded` | 402 | 超出预算上限（硬限制时） |
-| `permission_denied` | 403 | 无此操作权限 |
+| `api_key_suspended` | 401 | API Key已被暂停（Key泄露检测） |
+| `jwt_validation_failed` | 401 | SSO JWT校验失败 |
+| `permission_denied` | 403 | 无此操作权限（scope不足） |
 | `ip_not_allowed` | 403 | 请求IP不在白名单 |
+| `scope_denied` | 403 | 请求操作超出Key权限范围 |
+
+**限流/资源错误：**
+| 错误码 | HTTP状态 | 说明 |
+|--------|---------|------|
+| `rate_limit_exceeded` | 429 | 超出RPM/TPM限制 |
+| `quota_exceeded` | 402 | Token额度不足（预检拒绝） |
+| `budget_exceeded` | 402 | 超出预算上限（硬限制） |
+
+**模型/路由错误：**
+| 错误码 | HTTP状态 | 说明 |
+|--------|---------|------|
 | `model_not_found` | 404 | 指定模型不存在或未接入 |
-| `model_unavailable` | 503 | 模型当前不可用，无可用实例 |
-| `content_policy_violation` | 403 | 请求内容违反安全策略 |
-| `rate_limit_exceeded` | 429 | 超出RPM或TPM限制 |
-| `upstream_timeout` | 504 | 上游模型API调用超时 |
-| `upstream_error` | 502 | 上游模型API返回错误 |
+| `model_deprecated` | 404 | 模型已弃用，请使用迁移目标模型 |
+| `model_unavailable` | 503 | 模型当前无可用后端实例 |
 | `context_length_exceeded` | 400 | 请求超过模型最大上下文长度 |
-| `internal_server_error` | 500 | 平台内部错误 |
+
+**合规安全错误（V2.0 新增）：**
+| 错误码 | HTTP状态 | 说明 |
+|--------|---------|------|
+| `content_policy_violation` | 403 | 请求/响应内容违反安全策略 |
+| `pii_detected` | 403 | PII检测命中（取决于策略配置） |
+| `prompt_injection_detected` | 403 | Prompt注入攻击检测 |
+| `region_restricted` | 451 | 数据驻留禁止路由到目标地域 |
+| `zdr_limitation` | 403 | ZDR模式下不支持的操作 |
+
+**上游错误：**
+| 错误码 | HTTP状态 | 说明 |
+|--------|---------|------|
+| `upstream_timeout` | 504 | 上游模型API调用超时 |
+| `upstream_unavailable` | 503 | 上游模型服务不可用 |
+| `upstream_rate_limit` | 429 | 上游供应商限流 |
+| `upstream_content_blocked` | 400 | 上游供应商内容拦截 |
+| `upstream_connection_failed` | 502 | 上游连接失败（DNS/TCP/SSL） |
+| `upstream_server_error` | 502 | 上游服务器内部错误 |
+| `internal_server_error` | 500 | MaaS平台内部错误 |
 
 ---
 
@@ -751,4 +840,5 @@ def call_with_retry(func, max_retries=3):
 
 | 版本 | 日期 | 修改内容 | 修改人 |
 |------|------|---------|--------|
-| V1.0 | 2026-05-14 | 初始版本，基于PRD V4.0生成 | - |
+| V1.0 | 2026-05-14 | 初始版本，基于PRD V4.0生成 | — |
+| V2.0 | 2026-05-25 | 对齐 PRD V2.0：新增 Anthropic/Gemini/WS 端点、19角色RBAC权限模型、5种API Key类型、SSO JWT双模认证、cached_tokens用量、合规安全错误码、区域限制（451）、注入检测（403） | — |
